@@ -1,7 +1,7 @@
 // 🎯 라이브 코딩 실습 - 템플릿
 // 강사와 함께 AAA 패턴으로 테스트를 작성해보세요!
 
-import { type User } from "../utils/liveCodingFunctions";
+import { User } from "../../../utils/liveCodingFunctions";
 
 describe.skip("🧪 라이브 코딩 실습: AAA 패턴으로 테스트 작성", () => {
   // ===== 실습 1: calculateTax 함수 테스트 =====

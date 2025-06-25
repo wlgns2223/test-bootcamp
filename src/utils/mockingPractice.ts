@@ -75,11 +75,7 @@ export interface EmailService {
 }
 
 export const emailService: EmailService = {
-  sendEmail: async (
-    to: string,
-    subject: string,
-    body: string
-  ): Promise<boolean> => {
+  sendEmail: async (to: string, subject: string, body: string): Promise<boolean> => {
     // 실제로는 이메일을 보내지만, 테스트에서는 mock으로 대체
     console.log(`Sending email to ${to}: ${subject}`);
     return new Promise((resolve) => {
@@ -87,10 +83,7 @@ export const emailService: EmailService = {
     });
   },
 
-  sendWelcomeEmail: async (
-    userEmail: string,
-    userName: string
-  ): Promise<boolean> => {
+  sendWelcomeEmail: async (userEmail: string, userName: string): Promise<boolean> => {
     const subject = `${userName}님, 환영합니다!`;
     const body = `안녕하세요 ${userName}님, 가입을 환영합니다.`;
     return emailService.sendEmail(userEmail, subject, body);
@@ -106,11 +99,7 @@ export class NotificationService {
 
   async sendUserNotification(userId: number, message: string) {
     const user = await this.userService.getUser(userId);
-    const emailSent = await this.emailService.sendEmail(
-      user.email,
-      "알림",
-      message
-    );
+    const emailSent = await this.emailService.sendEmail(user.email, "알림", message);
 
     if (emailSent) {
       await this.userService.updateUserActivity(userId, "NOTIFICATION_SENT");
@@ -266,11 +255,7 @@ export class OrderService {
     };
 
     // 주문 확인 이메일 발송
-    await this.emailService.sendEmail(
-      user.email,
-      "주문 확인",
-      `주문 번호 ${order.id}가 접수되었습니다.`
-    );
+    await this.emailService.sendEmail(user.email, "주문 확인", `주문 번호 ${order.id}가 접수되었습니다.`);
 
     // 사용자 활동 기록
     await this.userService.updateUserActivity(userId, "ORDER_CREATED");
@@ -477,9 +462,7 @@ export class WeatherService {
 
 // 15. 데이터 처리 서비스 (여러 모듈 의존성)
 export class DataProcessor {
-  async processUserData(
-    users: Array<{ id: number; name: string; joinDate: string }>
-  ) {
+  async processUserData(users: Array<{ id: number; name: string; joinDate: string }>) {
     logger.info("Processing user data", { count: users.length });
 
     try {
@@ -491,8 +474,7 @@ export class DataProcessor {
         const processedChunk = chunk.map((user) => {
           const joinDate = new Date(user.joinDate);
           const daysSinceJoin = Math.floor(
-            (dateUtils.getCurrentDate().getTime() - joinDate.getTime()) /
-              (1000 * 60 * 60 * 24)
+            (dateUtils.getCurrentDate().getTime() - joinDate.getTime()) / (1000 * 60 * 60 * 24)
           );
 
           return {
@@ -507,10 +489,7 @@ export class DataProcessor {
 
         // API에 처리된 데이터 저장
         if (config.isProduction()) {
-          await httpClient.post(
-            `${config.getApiUrl()}/users/batch-update`,
-            processedChunk
-          );
+          await httpClient.post(`${config.getApiUrl()}/users/batch-update`, processedChunk);
         }
       }
 
@@ -529,11 +508,7 @@ export class DataProcessor {
 export class CacheService {
   private cache = new Map<string, { data: any; expiry: number }>();
 
-  async get<T>(
-    key: string,
-    fetcher?: () => Promise<T>,
-    ttlMinutes: number = 5
-  ): Promise<T | null> {
+  async get<T>(key: string, fetcher?: () => Promise<T>, ttlMinutes: number = 5): Promise<T | null> {
     const cached = this.cache.get(key);
     const now = dateUtils.getCurrentDate().getTime();
 
@@ -632,17 +607,13 @@ export class SecurityService {
 
   hashPassword(password: string): string {
     const salt = nodeCrypto.randomBytes(16).toString("hex");
-    const hash = nodeCrypto
-      .pbkdf2Sync(password, salt, 10000, 64, "sha512")
-      .toString("hex");
+    const hash = nodeCrypto.pbkdf2Sync(password, salt, 10000, 64, "sha512").toString("hex");
     return `${salt}:${hash}`;
   }
 
   verifyPassword(password: string, stored: string): boolean {
     const [salt, hash] = stored.split(":");
-    const hashToVerify = nodeCrypto
-      .pbkdf2Sync(password, salt, 10000, 64, "sha512")
-      .toString("hex");
+    const hashToVerify = nodeCrypto.pbkdf2Sync(password, salt, 10000, 64, "sha512").toString("hex");
     return hash === hashToVerify;
   }
 
@@ -714,10 +685,7 @@ export class DataProcessingService {
   }, 300);
 
   private processData(data: any) {
-    const cacheKey = nodeCrypto
-      .createHash("md5")
-      .update(JSON.stringify(data))
-      .digest("hex");
+    const cacheKey = nodeCrypto.createHash("md5").update(JSON.stringify(data)).digest("hex");
 
     if (this.dataCache.has(cacheKey)) {
       return this.dataCache.get(cacheKey);
@@ -770,7 +738,8 @@ export class DateTimeService {
     const businessDays: Date[] = [];
     let current = startOfMonth;
 
-    while (current.isBefore(endOfMonth) || current.isSame(endOfMonth, "day")) {
+    // 더 안전한 루프 조건: 날짜만 비교하고 월이 같을 때까지만 반복
+    while (current.month() === month - 1) {
       if (this.isBusinessDay(current.toDate())) {
         businessDays.push(current.toDate());
       }
@@ -780,11 +749,7 @@ export class DateTimeService {
     return businessDays;
   }
 
-  createSchedule(
-    startDate: Date | string,
-    intervalDays: number,
-    count: number
-  ): Date[] {
+  createSchedule(startDate: Date | string, intervalDays: number, count: number): Date[] {
     const schedule: Date[] = [];
     let current = dayjs(startDate);
 
@@ -808,13 +773,12 @@ export class BusinessService {
 
   async createBusinessReport(reportData: any) {
     try {
+      // 0. 설정 파일 읽기
+      const config = await this.fileService.readConfig("./config.json");
+
       // 1. 데이터 처리 및 통계 계산
-      const processedData = this.dataService.processUserData(
-        reportData.users || []
-      );
-      const stats = reportData.numbers
-        ? this.dataService.calculateStats(reportData.numbers)
-        : null;
+      const processedData = this.dataService.processUserData(reportData.users || []);
+      const stats = reportData.numbers ? this.dataService.calculateStats(reportData.numbers) : null;
 
       // 2. 보고서 ID 생성
       const reportId = this.securityService.generateSecureId();
@@ -831,11 +795,9 @@ export class BusinessService {
           summary: lodash.pick(reportData, ["department", "period", "type"]),
         },
         metadata: {
-          hash: nodeCrypto
-            .createHash("sha256")
-            .update(JSON.stringify(processedData))
-            .digest("hex"),
+          hash: nodeCrypto.createHash("sha256").update(JSON.stringify(processedData)).digest("hex"),
           version: "1.0.0",
+          config: config,
         },
       };
 
@@ -853,11 +815,7 @@ export class BusinessService {
   }
 
   async scheduleBusinessTasks(tasks: any[], startDate: Date) {
-    const schedule = this.dateService.createSchedule(
-      startDate,
-      1,
-      tasks.length
-    );
+    const schedule = this.dateService.createSchedule(startDate, 1, tasks.length);
 
     return tasks.map((task, index) => ({
       ...task,
@@ -881,9 +839,7 @@ export class BusinessService {
     };
 
     // 파일로 저장
-    const fileName = `export-${exportId}-${dayjs().format(
-      "YYYY-MM-DD-HH-mm-ss"
-    )}.${format}`;
+    const fileName = `export-${exportId}-${dayjs().format("YYYY-MM-DD-HH-mm-ss")}.${format}`;
     await this.fileService.writeLog({
       action: "DATA_EXPORTED",
       exportId,
@@ -898,9 +854,7 @@ export class BusinessService {
     if (lodash.isEmpty(data)) return "";
 
     const headers = Object.keys(data[0]);
-    const rows = data.map((item) =>
-      headers.map((header) => JSON.stringify(item[header] || "")).join(",")
-    );
+    const rows = data.map((item) => headers.map((header) => JSON.stringify(item[header] || "")).join(","));
 
     return [headers.join(","), ...rows].join("\n");
   }
@@ -940,10 +894,7 @@ export class ExternalLibService {
       token: hash,
       id: uuid.v4(),
       createdAt: moment.format(new Date(), "YYYY-MM-DD HH:mm:ss"),
-      expiresAt: moment.format(
-        moment.add(new Date(), 1, "days"),
-        "YYYY-MM-DD HH:mm:ss"
-      ),
+      expiresAt: moment.format(moment.add(new Date(), 1, "days"), "YYYY-MM-DD HH:mm:ss"),
     };
   }
 }

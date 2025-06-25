@@ -130,13 +130,7 @@ describe("📦 NPM 모듈 모킹 완성 답안", () => {
       // crypto 함수들의 호출 확인
       const crypto = require("crypto");
       expect(crypto.randomBytes).toHaveBeenCalledWith(16);
-      expect(crypto.pbkdf2Sync).toHaveBeenCalledWith(
-        "testpassword",
-        expect.any(String),
-        10000,
-        64,
-        "sha512"
-      );
+      expect(crypto.pbkdf2Sync).toHaveBeenCalledWith("testpassword", expect.any(String), 10000, 64, "sha512");
     });
   });
 
@@ -158,10 +152,7 @@ describe("📦 NPM 모듈 모킹 완성 답안", () => {
       });
 
       // fs.readFile이 올바른 인자로 호출되었는지 확인
-      expect(fs.readFile).toHaveBeenCalledWith(
-        "/resolved/path/./package.json",
-        "utf-8"
-      );
+      expect(fs.readFile).toHaveBeenCalledWith("/resolved/path/./package.json", "utf-8");
     });
 
     it("로그 파일 작성 기능 테스트하기", async () => {
@@ -325,16 +316,10 @@ describe("📦 NPM 모듈 모킹 완성 답안", () => {
       const dateTimeService = new DateTimeService();
 
       // formatDate() 호출
-      const formatted = dateTimeService.formatDate(
-        new Date("2023-01-01"),
-        "YYYY-MM-DD"
-      );
+      const formatted = dateTimeService.formatDate(new Date("2023-01-01"), "YYYY-MM-DD");
 
       // getDaysBetween() 호출
-      const days = dateTimeService.getDaysBetween(
-        new Date("2023-01-01"),
-        new Date("2023-01-08")
-      );
+      const days = dateTimeService.getDaysBetween(new Date("2023-01-01"), new Date("2023-01-08"));
 
       // 결과 확인 (dayjs가 모킹되어 있음)
       expect(formatted).toBe("2023-12-01");
@@ -355,9 +340,7 @@ describe("📦 NPM 모듈 모킹 완성 답안", () => {
       expect(Array.isArray(businessDays)).toBe(true);
 
       // isBusinessDay() 테스트
-      const isBusinessDay = dateTimeService.isBusinessDay(
-        new Date("2023-12-01")
-      );
+      const isBusinessDay = dateTimeService.isBusinessDay(new Date("2023-12-01"));
       expect(typeof isBusinessDay).toBe("boolean");
 
       // dayjs가 호출되었는지 확인
@@ -404,9 +387,7 @@ describe("📦 NPM 모듈 모킹 완성 답안", () => {
       expect(report.createdAt).toBe("2023-12-01T10:00:00.000Z");
       expect(report.title).toBe("Q4 보고서");
       expect(report.createdBy).toBe("Test Admin");
-      expect(report.data.processed).toEqual([
-        { id: "processed-user", fullName: "John Doe" },
-      ]);
+      expect(report.data.processed).toEqual([{ id: "processed-user", fullName: "John Doe" }]);
       expect(report.data.statistics.sum).toBe(100);
 
       // 모든 의존성이 호출되었는지 확인
@@ -467,10 +448,7 @@ describe("📦 NPM 모듈 모킹 완성 답안", () => {
       fs.appendFile.mockResolvedValue(undefined);
 
       // scheduleBusinessTasks() 호출 (startDate 파라미터 추가)
-      const schedule = await businessService.scheduleBusinessTasks(
-        tasks,
-        startDate
-      );
+      const schedule = await businessService.scheduleBusinessTasks(tasks, startDate);
 
       // 스케줄링 결과 확인 (배열이 반환됨)
       expect(Array.isArray(schedule)).toBe(true);
@@ -537,12 +515,16 @@ describe("📦 NPM 모듈 모킹 완성 답안", () => {
       const businessService = new BusinessService();
 
       // 복잡한 비즈니스 로직 실행
-      const testData = [{ name: "Test User", department: "IT" }];
+      const testUsers = [{ name: "Test User", department: "IT", active: true, firstName: "Test", lastName: "User" }];
+      const reportData = {
+        title: "Test Report",
+        users: testUsers,
+      };
 
       const fs = require("fs/promises");
       fs.readFile.mockResolvedValue('{"setting": "test"}');
 
-      await businessService.createBusinessReport(testData);
+      await businessService.createBusinessReport(reportData);
 
       // 호출 순서와 패턴 검증
       const { v4 } = require("uuid");
@@ -553,16 +535,13 @@ describe("📦 NPM 모듈 모킹 완성 답안", () => {
       expect(v4.mock.calls.length).toBeGreaterThan(0);
 
       // lodash 체인이 호출되었는지 확인
-      expect(_.chain).toHaveBeenCalledWith(testData);
+      expect(_.chain).toHaveBeenCalledWith(testUsers);
 
       // dayjs가 호출되었는지 확인
       expect(dayjs).toHaveBeenCalled();
 
       // fs.readFile이 특정 패턴으로 호출되었는지 확인
-      expect(fs.readFile).toHaveBeenCalledWith(
-        expect.stringContaining("config"),
-        "utf-8"
-      );
+      expect(fs.readFile).toHaveBeenCalledWith(expect.stringContaining("config"), "utf-8");
     });
 
     it("모킹된 모듈의 에러 처리 테스트하기", async () => {
@@ -573,15 +552,12 @@ describe("📦 NPM 모듈 모킹 완성 답안", () => {
       fs.readFile.mockRejectedValue(new Error("파일을 찾을 수 없습니다"));
 
       // 에러 상황에서 애플리케이션이 올바르게 처리하는지 확인
-      await expect(
-        fileService.readConfig("./nonexistent.json")
-      ).rejects.toThrow("설정 파일을 읽을 수 없습니다: ./nonexistent.json");
+      await expect(fileService.readConfig("./nonexistent.json")).rejects.toThrow(
+        "설정 파일을 읽을 수 없습니다: ./nonexistent.json"
+      );
 
       // fs.readFile이 호출되었는지 확인
-      expect(fs.readFile).toHaveBeenCalledWith(
-        "/resolved/path/./nonexistent.json",
-        "utf-8"
-      );
+      expect(fs.readFile).toHaveBeenCalledWith("/resolved/path/./nonexistent.json", "utf-8");
 
       // 에러 복구 테스트 - 다시 정상 동작하도록 설정
       fs.readFile.mockResolvedValue('{"recovered": true}');

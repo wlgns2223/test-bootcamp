@@ -177,19 +177,11 @@ describe("🧪 Jest Mocking과 Spy 기본 개념", () => {
       };
 
       // Act
-      const success = await mockEmailService.sendEmail(
-        "test@example.com",
-        "테스트 제목",
-        "테스트 내용"
-      );
+      const success = await mockEmailService.sendEmail("test@example.com", "테스트 제목", "테스트 내용");
 
       // Assert
       expect(success).toBe(true);
-      expect(mockEmailService.sendEmail).toHaveBeenCalledWith(
-        "test@example.com",
-        "테스트 제목",
-        "테스트 내용"
-      );
+      expect(mockEmailService.sendEmail).toHaveBeenCalledWith("test@example.com", "테스트 제목", "테스트 내용");
     });
   });
 
@@ -216,28 +208,15 @@ describe("🧪 Jest Mocking과 Spy 기본 개념", () => {
       };
 
       // Act: 모든 의존성을 주입하여 서비스 생성
-      const notificationService = new NotificationService(
-        mockEmailService,
-        mockUserService as any
-      );
+      const notificationService = new NotificationService(mockEmailService, mockUserService as any);
 
-      const result = await notificationService.sendUserNotification(
-        1,
-        "중요한 알림!"
-      );
+      const result = await notificationService.sendUserNotification(1, "중요한 알림!");
 
       // Assert: 모든 단계가 올바르게 실행되었는지 확인
       expect(result).toBe(true);
       expect(mockUserService.getUser).toHaveBeenCalledWith(1);
-      expect(mockEmailService.sendEmail).toHaveBeenCalledWith(
-        "user@test.com",
-        "알림",
-        "중요한 알림!"
-      );
-      expect(mockUserService.updateUserActivity).toHaveBeenCalledWith(
-        1,
-        "NOTIFICATION_SENT"
-      );
+      expect(mockEmailService.sendEmail).toHaveBeenCalledWith("user@test.com", "알림", "중요한 알림!");
+      expect(mockUserService.updateUserActivity).toHaveBeenCalledWith(1, "NOTIFICATION_SENT");
     });
 
     it("주문 서비스는 사용자, 이메일, 유틸 서비스를 모두 사용한다", async () => {
@@ -268,15 +247,9 @@ describe("🧪 Jest Mocking과 Spy 기본 개념", () => {
       };
 
       // Act
-      const orderService = new OrderService(
-        mockUserService as any,
-        mockEmailService,
-        mockUtils as any
-      );
+      const orderService = new OrderService(mockUserService as any, mockEmailService, mockUtils as any);
 
-      const order = await orderService.createOrder(1, [
-        { name: "상품A", price: 10000, quantity: 2 },
-      ]);
+      const order = await orderService.createOrder(1, [{ name: "상품A", price: 10000, quantity: 2 }]);
 
       // Assert: 주문 생성 프로세스 전체 검증
       expect(order.id).toBe("order-123");
@@ -287,10 +260,7 @@ describe("🧪 Jest Mocking과 Spy 기본 개념", () => {
         "주문 확인",
         "주문 번호 order-123가 접수되었습니다."
       );
-      expect(mockUserService.updateUserActivity).toHaveBeenCalledWith(
-        1,
-        "ORDER_CREATED"
-      );
+      expect(mockUserService.updateUserActivity).toHaveBeenCalledWith(1, "ORDER_CREATED");
     });
   });
 
@@ -351,9 +321,7 @@ describe("🧪 Jest Mocking과 Spy 기본 개념", () => {
       readFileSpy.mockRejectedValue(new Error("파일을 찾을 수 없습니다"));
 
       // Act & Assert
-      await expect(fileSystem.readFile("missing.txt")).rejects.toThrow(
-        "파일을 찾을 수 없습니다"
-      );
+      await expect(fileSystem.readFile("missing.txt")).rejects.toThrow("파일을 찾을 수 없습니다");
 
       // Clean up
       readFileSpy.mockRestore();
@@ -422,9 +390,7 @@ describe("🧪 Jest Mocking과 Spy 기본 개념", () => {
 
       // Act & Assert
       const userService = new UserService(mockApiClient);
-      await expect(userService.getUser(1)).rejects.toThrow(
-        "사용자를 찾을 수 없습니다"
-      );
+      await expect(userService.getUser(1)).rejects.toThrow("사용자를 찾을 수 없습니다");
     });
 
     it("조건부 mock 반환값으로 다양한 시나리오 테스트", () => {
