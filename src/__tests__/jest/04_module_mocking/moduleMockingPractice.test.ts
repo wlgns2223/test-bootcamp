@@ -170,9 +170,7 @@ describe("📦 NPM 모듈 모킹 실습", () => {
 
       // Assert: 해싱 결과에 모킹된 값들이 포함되어 있는지 확인
       // 'mocked-random-bytes'의 hex 인코딩과 'mocked-pbkdf2'의 hex 인코딩이 포함됨
-      expect(hashedPassword).toContain(
-        "6d6f636b65642d72616e646f6d2d6279746573"
-      ); // 'mocked-random-bytes' hex
+      expect(hashedPassword).toContain("6d6f636b65642d72616e646f6d2d6279746573"); // 'mocked-random-bytes' hex
       expect(hashedPassword).toContain("6d6f636b65642d70626b646632"); // 'mocked-pbkdf2' hex
 
       // crypto 함수들의 정확한 호출 확인
@@ -321,10 +319,7 @@ describe("📦 NPM 모듈 모킹 실습", () => {
       expect(grouped).toEqual({});
 
       // lodash.groupBy 호출 확인
-      expect(mockedLodash.groupBy).toHaveBeenCalledWith(
-        employees,
-        "department"
-      );
+      expect(mockedLodash.groupBy).toHaveBeenCalledWith(employees, "department");
 
       // 📚 배울 점:
       // - 그룹화, 정렬 등의 유틸리티 함수도 모킹으로 대체 가능
@@ -507,10 +502,7 @@ describe("📦 NPM 모듈 모킹 실습", () => {
       ];
 
       // Act: 업무 스케줄링 (DateTimeService 사용)
-      const scheduled = await businessService.scheduleBusinessTasks(
-        tasks,
-        new Date("2023-01-01")
-      );
+      const scheduled = await businessService.scheduleBusinessTasks(tasks, new Date("2023-01-01"));
 
       // Assert: 스케줄된 작업들 확인
       expect(scheduled).toHaveLength(2);
@@ -673,7 +665,7 @@ describe("📦 NPM 모듈 모킹 실습", () => {
 
       // Act & Assert: 에러 처리 확인
       await expect(fileService.readConfig("nonexistent.json")).rejects.toThrow(
-        "File not found"
+        "설정 파일을 읽을 수 없습니다: nonexistent.json"
       );
 
       // 호출 시도가 있었는지 확인
