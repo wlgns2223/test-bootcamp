@@ -34,9 +34,7 @@ describe("🧪 Jest Matcher 라이브 코딩 실습 (완성본)", () => {
       // Act & Assert: 적절한 matcher 사용하기
       expect(number).toBe(42);
       expect(text).toBe("hello");
-      expect(user).toEqual(
-        expect.objectContaining({ name: "김개발", age: 25 })
-      );
+      expect(user).toEqual(expect.objectContaining({ name: "김개발", age: 25 }));
       expect(numbers).toEqual([1, 2, 3]);
     });
 
@@ -281,9 +279,7 @@ describe("🧪 Jest Matcher 라이브 코딩 실습 (완성본)", () => {
 
     it("존재하지 않는 사용자 조회시 에러가 발생한다", async () => {
       // Act & Assert
-      await expect(fetchUserData(999)).rejects.toThrow(
-        "사용자를 찾을 수 없습니다"
-      );
+      await expect(fetchUserData(999)).rejects.toThrow("사용자를 찾을 수 없습니다");
     });
 
     it("Promise resolve를 다양한 방법으로 테스트한다", async () => {
@@ -309,89 +305,7 @@ describe("🧪 Jest Matcher 라이브 코딩 실습 (완성본)", () => {
     it("Promise reject를 다양한 방법으로 테스트한다", async () => {
       // Act & Assert
       await expect(fetchUserData(999)).rejects.toBeInstanceOf(Error);
-      await expect(fetchUserData(999)).rejects.toThrow(
-        /사용자를 찾을 수 없습니다/
-      );
-    });
-  });
-
-  // ===== 실습 8: 고급 Matcher =====
-  describe("🚀 고급 실습", () => {
-    it("타입을 확인하는 동적 매칭을 한다", () => {
-      // Arrange
-      const user = createUser("테스터", 30);
-
-      // Act & Assert
-      expect(user).toEqual({
-        name: "테스터",
-        age: 30,
-        id: expect.any(Number), // 어떤 숫자든 OK
-      });
-    });
-
-    it("배열의 부분 포함 관계를 확인한다", () => {
-      // Arrange
-      const allTags = getPopularTags();
-      const requiredTags = ["javascript", "react"];
-
-      // Act & Assert
-      expect(allTags).toEqual(expect.arrayContaining(requiredTags));
-    });
-
-    it("객체의 부분 매칭을 확인한다", () => {
-      // Arrange
-      const product = createProduct("키보드", 150000, "accessories");
-
-      // Act & Assert
-      expect(product).toEqual(
-        expect.objectContaining({
-          name: "키보드",
-          price: 150000,
-          inStock: true,
-        })
-      );
-
-      expect(product).toEqual(
-        expect.objectContaining({
-          metadata: expect.objectContaining({
-            createdAt: expect.any(String),
-            updatedAt: expect.any(String),
-          }),
-        })
-      );
-    });
-
-    it("복합적인 고급 매칭을 사용한다", () => {
-      // Arrange
-      const users = [
-        createUser("사용자1", 25),
-        createUser("사용자2", 30),
-        createUser("사용자3", 35),
-      ];
-
-      // Act & Assert
-      expect(users).toHaveLength(3);
-      expect(users).toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({
-            name: "사용자1",
-            age: expect.any(Number),
-            id: expect.any(Number),
-          }),
-        ])
-      );
-    });
-
-    it("문자열 패턴 매칭을 사용한다", () => {
-      // Arrange
-      const email1 = generateEmail("test.user");
-      const email2 = generateEmail("admin", "company.co.kr");
-
-      // Act & Assert
-      expect(email1).toEqual(expect.stringMatching(/^[\w.]+@[\w.]+$/));
-      expect(email2).toEqual(expect.stringMatching(/company\.co\.kr$/));
-      expect(email1).toEqual(expect.stringContaining("@"));
-      expect(email2).toEqual(expect.stringContaining("admin"));
+      await expect(fetchUserData(999)).rejects.toThrow(/사용자를 찾을 수 없습니다/);
     });
   });
 
@@ -418,10 +332,7 @@ describe("🧪 Jest Matcher 라이브 코딩 실습 (완성본)", () => {
     it("쇼핑몰 주문 시나리오를 테스트한다", () => {
       // Arrange
       const cart = createShoppingCart();
-      const products = [
-        createProduct("상품1", 10000, "category1"),
-        createProduct("상품2", 20000, "category2"),
-      ];
+      const products = [createProduct("상품1", 10000, "category1"), createProduct("상품2", 20000, "category2")];
 
       const items: CartItem[] = [
         { name: "상품1", price: 10000, quantity: 2 },

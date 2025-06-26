@@ -278,9 +278,7 @@ describe("🧪 Jest Matcher 완전 정복", () => {
 
     it("Promise가 reject되는지 확인한다", async () => {
       // Arrange & Act & Assert
-      await expect(fetchUserData(999)).rejects.toThrow(
-        "사용자를 찾을 수 없습니다"
-      );
+      await expect(fetchUserData(999)).rejects.toThrow("사용자를 찾을 수 없습니다");
       await expect(fetchUserData(999)).rejects.toBeInstanceOf(Error);
     });
 
@@ -295,62 +293,6 @@ describe("🧪 Jest Matcher 완전 정복", () => {
       expect(userData).toHaveProperty("id", userId);
       expect(userData).toHaveProperty("name", `사용자${userId}`);
       expect(userData.email).toContain(`user${userId}@`);
-    });
-  });
-
-  // ===== 8. 고급 Matcher =====
-  describe("🚀 고급 Matcher: expect.any, expect.arrayContaining", () => {
-    it("expect.any로 타입을 확인한다", () => {
-      // Arrange
-      const user = createUser("테스터", 28);
-      const product = createProduct("키보드", 150000, "accessories");
-
-      // Act & Assert
-      expect(user).toEqual({
-        name: "테스터",
-        age: 28,
-        id: expect.any(Number),
-      });
-
-      expect(product).toEqual(
-        expect.objectContaining({
-          name: expect.any(String),
-          price: expect.any(Number),
-          metadata: expect.any(Object),
-        })
-      );
-    });
-
-    it("expect.arrayContaining으로 배열 포함 관계를 확인한다", () => {
-      // Arrange
-      const allTags = getPopularTags();
-      const frontendTags = ["javascript", "react"];
-
-      // Act & Assert
-      expect(allTags).toEqual(expect.arrayContaining(frontendTags));
-      expect(allTags).toEqual(expect.arrayContaining(["jest"]));
-      expect(allTags).not.toEqual(expect.arrayContaining(["python", "django"]));
-    });
-
-    it("expect.objectContaining으로 객체 부분 매칭을 확인한다", () => {
-      // Arrange
-      const product = createProduct("모니터", 400000, "display");
-
-      // Act & Assert
-      expect(product).toEqual(
-        expect.objectContaining({
-          name: "모니터",
-          price: 400000,
-        })
-      );
-
-      expect(product).toEqual(
-        expect.objectContaining({
-          metadata: expect.objectContaining({
-            createdAt: expect.any(String),
-          }),
-        })
-      );
     });
   });
 });

@@ -192,34 +192,6 @@ describe.skip("🧪 Jest Matcher 라이브 코딩 실습", () => {
       // await expect(fetchUserData(999)).???.toThrow('사용자를 찾을 수 없습니다');
     });
   });
-
-  // ===== 실습 8: 고급 Matcher =====
-  describe("🚀 고급 실습", () => {
-    it("타입을 확인하는 동적 매칭을 한다", () => {
-      // TODO: expect.any 사용
-
-      // Arrange
-      const user = createUser("테스터", 30);
-
-      // Act & Assert
-      // expect(user).toEqual({
-      //   name: 'テスタ',
-      //   age: 30,
-      //   id: expect.???(Number)  // 어떤 숫자든 OK
-      // });
-    });
-
-    it("배열의 부분 포함 관계를 확인한다", () => {
-      // TODO: expect.arrayContaining 사용
-
-      // Arrange
-      const allTags = getPopularTags();
-      const requiredTags = ["javascript", "react"];
-
-      // Act & Assert
-      // expect(allTags).toEqual(expect.???(requiredTags));
-    });
-  });
 });
 
 // ===== 💡 실습 가이드 =====
