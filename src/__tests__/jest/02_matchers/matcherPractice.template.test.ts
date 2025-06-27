@@ -21,7 +21,7 @@ import {
   type CartItem,
 } from "../../../utils/matcherPractice";
 
-describe.skip("🧪 Jest Matcher 라이브 코딩 실습", () => {
+describe("🧪 Jest Matcher 라이브 코딩 실습", () => {
   // ===== 실습 1: 기본 비교 Matcher =====
   describe("📊 기본 비교 실습: toBe vs toEqual", () => {
     it("원시값은 toBe, 객체/배열은 toEqual을 사용한다", () => {
@@ -34,10 +34,10 @@ describe.skip("🧪 Jest Matcher 라이브 코딩 실습", () => {
       const numbers = [1, 2, 3];
 
       // Act & Assert: 적절한 matcher 사용하기
-      // expect(number).???(42);
-      // expect(text).???('hello');
-      // expect(user).???(expect.objectContaining({ name: '김개발', age: 25 }));
-      // expect(numbers).???([1, 2, 3]);
+      expect(number).toBe(42);
+      expect(text).toBe("hello");
+      expect(user).toEqual(expect.objectContaining({ name: "김개발", age: 25 }));
+      expect(numbers).toEqual([1, 2, 3]);
     });
   });
 
@@ -52,9 +52,9 @@ describe.skip("🧪 Jest Matcher 라이브 코딩 실습", () => {
       const emptyPassword = "";
 
       // Act & Assert
-      // expect(validatePassword(validPassword)).???();
-      // expect(validatePassword(invalidPassword)).???();
-      // expect(validatePassword(emptyPassword)).???();
+      expect(validatePassword(validPassword)).toBeTruthy();
+      expect(validatePassword(invalidPassword)).toBeFalsy();
+      expect(validatePassword(emptyPassword)).toBeFalsy();
     });
 
     it("null과 undefined를 구분한다", () => {
@@ -66,9 +66,9 @@ describe.skip("🧪 Jest Matcher 라이브 코딩 실습", () => {
       const activeUser = { isActive: true };
 
       // Act & Assert
-      // expect(checkLoginStatus(nullUser)).???();
-      // expect(checkLoginStatus(userWithoutStatus)).???();
-      // expect(checkLoginStatus(activeUser)).not.???();
+      expect(checkLoginStatus(nullUser)).toBeNull();
+      expect(checkLoginStatus(userWithoutStatus)).toBeUndefined();
+      expect(checkLoginStatus(activeUser)).not.toBeUndefined();
     });
   });
 
@@ -81,9 +81,9 @@ describe.skip("🧪 Jest Matcher 라이브 코딩 실습", () => {
       const score = calculateScore(85, 100);
 
       // Act & Assert
-      // expect(score).???(80);      // 80점보다 높음
-      // expect(score).???(90);      // 90점보다 낮음
-      // expect(score).???(85);      // 정확히 85점
+      expect(score).toBeGreaterThan(80); // 80점보다 높음
+      expect(score).toBeLessThan(90); // 90점보다 낮음
+      expect(score).toBe(85); // 정확히 85점
     });
 
     it("부동소수점 계산 결과를 비교한다", () => {
@@ -94,8 +94,8 @@ describe.skip("🧪 Jest Matcher 라이브 코딩 실습", () => {
       const percentage = calculateScore(1, 3);
 
       // Act & Assert
-      // expect(result).???(0.3);           // 소수점 오차 고려
-      // expect(percentage).???(33.33, 2);  // 소수점 둘째 자리까지
+      expect(result).toBeCloseTo(0.3); // 소수점 오차 고려
+      expect(percentage).toBeCloseTo(33.33, 2); // 소수점 둘째 자리까지
     });
   });
 
@@ -108,9 +108,9 @@ describe.skip("🧪 Jest Matcher 라이브 코딩 실습", () => {
       const message = formatMessage("이개발", "파일 업로드");
 
       // Act & Assert
-      // expect(message).???('이개발');
-      // expect(message).???('파일 업로드');
-      // expect(message).not.???('삭제');
+      expect(message).toContain("이개발");
+      expect(message).toContain("파일 업로드");
+      expect(message).not.toContain("삭제");
     });
 
     it("이메일 형식을 정규표현식으로 검증한다", () => {
@@ -120,9 +120,9 @@ describe.skip("🧪 Jest Matcher 라이브 코딩 실습", () => {
       const email = generateEmail("test.user");
 
       // Act & Assert
-      // expect(email).???(/^[\w.]+@[\w.]+$/);  // 이메일 패턴
-      // expect(email).???('@');                 // @ 포함
-      // expect(email).???(/\.com$/);            // .com으로 끝남
+      expect(email).toMatch(/^[\w.]+@[\w.]+$/); // 이메일 패턴
+      expect(email).toContain("@"); // @ 포함
+      expect(email).toMatch(/\.com$/); // .com으로 끝남
     });
   });
 
@@ -135,10 +135,10 @@ describe.skip("🧪 Jest Matcher 라이브 코딩 실습", () => {
       const tags = getPopularTags();
 
       // Act & Assert
-      // expect(tags).???(5);              // 길이가 5
-      // expect(tags).???('javascript');   // javascript 포함
-      // expect(tags).???('react');        // react 포함
-      // expect(tags).not.???('python');   // python 미포함
+      expect(tags).toHaveLength(5); // 길이가 5
+      expect(tags).toContain("javascript"); // javascript 포함
+      expect(tags).toContain("react"); // react 포함
+      expect(tags).not.toContain("python"); // python 미포함
     });
 
     it("객체의 속성 존재와 값을 확인한다", () => {
@@ -148,10 +148,10 @@ describe.skip("🧪 Jest Matcher 라이브 코딩 실습", () => {
       const product = createProduct("iPhone", 1200000, "mobile");
 
       // Act & Assert
-      // expect(product).???('id');                    // id 속성 존재
-      // expect(product).???('name', 'iPhone');       // name이 'iPhone'
-      // expect(product).???('price', 1200000);       // price가 1200000
-      // expect(product).???('metadata.createdAt');   // 중첩 속성 존재
+      expect(product).toHaveProperty("id"); // id 속성 존재
+      expect(product).toHaveProperty("name", "iPhone"); // name이 'iPhone'
+      expect(product).toHaveProperty("price", 1200000); // price가 1200000
+      expect(product).toHaveProperty("metadata.createdAt"); // 중첩 속성 존재
     });
   });
 
@@ -160,17 +160,17 @@ describe.skip("🧪 Jest Matcher 라이브 코딩 실습", () => {
     it("0으로 나누기 에러를 확인한다", () => {
       // TODO: 나눗셈 함수 에러 처리
       // Act & Assert
-      // expect(() => divide(10, 0)).???();                           // 에러 발생
-      // expect(() => divide(10, 0)).???('Division by zero');         // 특정 메시지
-      // expect(() => divide(10, 2)).not.???();                       // 에러 미발생
+      expect(() => divide(10, 0)).toThrow(); // 에러 발생
+      expect(() => divide(10, 0)).toThrow("Division by zero"); // 특정 메시지
+      expect(() => divide(10, 2)).not.toThrow(); // 에러 미발생
     });
 
     it("잘못된 JSON 파싱 에러를 확인한다", () => {
       // TODO: JSON 파싱 에러 처리
       // Act & Assert
-      // expect(() => parseJSON('invalid')).???();                    // 에러 발생
-      // expect(() => parseJSON('invalid')).???(/Invalid JSON/);      // 메시지 패턴
-      // expect(() => parseJSON('{"valid": true}')).not.???();        // 에러 미발생
+      expect(() => parseJSON("invalid")).toThrow(); // 에러 발생
+      expect(() => parseJSON("invalid")).toThrow(/Invalid JSON/); // 메시지 패턴
+      expect(() => parseJSON('{"valid": true}')).not.toThrow(); // 에러 미발생
     });
   });
 
@@ -179,17 +179,17 @@ describe.skip("🧪 Jest Matcher 라이브 코딩 실습", () => {
     it("사용자 데이터를 성공적으로 가져온다", async () => {
       // TODO: Promise resolve 테스트
       // Act & Assert
-      // await expect(fetchUserData(1)).???.toEqual({
-      //   id: 1,
-      //   name: '김개발',
-      //   email: 'kim@example.com'
-      // });
+      await expect(fetchUserData(1)).resolves.toEqual({
+        id: 1,
+        name: "김개발",
+        email: "kim@example.com",
+      });
     });
 
     it("존재하지 않는 사용자 조회시 에러가 발생한다", async () => {
       // TODO: Promise reject 테스트
       // Act & Assert
-      // await expect(fetchUserData(999)).???.toThrow('사용자를 찾을 수 없습니다');
+      await expect(fetchUserData(999)).rejects.toThrow("사용자를 찾을 수 없습니다");
     });
   });
 });

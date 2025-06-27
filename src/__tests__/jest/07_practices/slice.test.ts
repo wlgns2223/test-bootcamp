@@ -1,5 +1,3 @@
-import { slice } from "lodash";
-
 /**
  * Jest의 `it.each`는 동일한 테스트 로직을 다양한 입력값(데이터 세트)으로 반복해서 실행할 수 있도록 해주는 함수입니다. 
  * 이 기능은 **파라미터화 테스트(Parameterized Test)**라고도 불리며, 여러 개의 테스트 케이스를 간결하게 작성할 때 유용합니다
@@ -13,6 +11,8 @@ import { slice } from "lodash";
   expect(a + b).toBe(expected);
 });
  */
+
+import slice from "../../../utils/slice";
 
 describe("slice", () => {
   const array = [1, 2, 3];
