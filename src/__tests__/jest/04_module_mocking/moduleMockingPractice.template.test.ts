@@ -12,6 +12,38 @@
 // - lodash: chain, groupBy, isEmpty, sum, mean, min, max, debounce 등을 모킹
 // - dayjs: dayjs 함수와 그 메서드들을 모킹
 
+jest.mock("uuid", () => ({
+  v4: jest.fn().mockReturnValue("mocked-uuid"),
+}));
+
+jest.mock("crypto", () => ({
+  randomBytes: jest.fn().mockReturnValue("mocked-bytes"),
+  createHash: jest.fn().mockReturnThis(),
+  update: jest.fn().mockReturnThis(),
+  digest: jest.fn().mockReturnValue("mocked-hash"),
+  pbkdf2Sync: jest.fn().mockReturnValue("mocked-key"),
+}));
+
+jest.mock("fs/promises", () => ({
+  readFile: jest.fn(),
+  mkdir: jest.fn(),
+  appendFile: jest.fn(),
+}));
+
+jest.mock("path", () => ({
+  resolve: jest.fn(),
+  join: jest.fn(),
+}));
+
+jest.mock("dayjs", () => {
+  const dayjsMock = jest.fn(() => ({
+    toISOString: jest.fn().mockReturnValue("2025-06-30"),
+    format: jest.fn(),
+  }));
+
+  return dayjsMock;
+});
+
 import {
   SecurityService,
   FileService,
@@ -19,6 +51,17 @@ import {
   DateTimeService,
   BusinessService,
 } from "../../../utils/mockingPractice";
+
+import { v4 } from "uuid";
+import * as crypto from "crypto";
+import * as fs from "fs/promises";
+import * as path from "path";
+import { mkdir } from "fs";
+
+const mockedV4 = v4 as jest.MockedFunction<typeof v4>;
+const mockedCrypto = crypto as jest.Mocked<typeof crypto>;
+const mockedFileSystem = fs as jest.Mocked<typeof fs>;
+const mockedPath = path as jest.Mocked<typeof path>;
 
 describe("📦 NPM 모듈 모킹 실습", () => {
   beforeEach(() => {
@@ -28,20 +71,12 @@ describe("📦 NPM 모듈 모킹 실습", () => {
   // ===== 1. UUID 모킹 =====
   describe("🆔 UUID 모킹", () => {
     it("uuid 모듈을 모킹하고 SecurityService 테스트하기", () => {
-      // TODO: 이 테스트를 완성하세요
-      //
-      // 단계:
-      // 1. SecurityService 인스턴스 생성
-      // 2. generateSecureId() 메서드 호출
-      // 3. 반환값이 모킹된 UUID인지 검증
-      // 4. uuid.v4가 호출되었는지 검증
-      //
-      // 힌트:
-      // - const securityService = new SecurityService();
-      // - const result = securityService.generateSecureId();
-      // - expect(result).toBe('expected-mocked-value');
-      // - const { v4 } = require('uuid');
-      // - expect(v4).toHaveBeenCalled();
+      const securityService = new SecurityService();
+
+      const result = securityService.generateSecureId();
+
+      // expect(result).toBe("0fa01032-86ef-475e-ba93-9c6e88dd62cd");
+      expect(result).toBe("mocked-uuid");
     });
   });
 
@@ -55,20 +90,22 @@ describe("📦 NPM 모듈 모킹 실습", () => {
       // 2. generateApiKey() 메서드 호출
       // 3. 반환값이 모킹된 해시값인지 검증
       // 4. crypto.randomBytes와 createHash가 호출되었는지 검증
+
+      const securityService = new SecurityService();
+
+      const result = securityService.generateApiKey();
+
+      expect(result).toEqual("mocked-hash");
     });
 
     it("password hashing 기능 테스트하기", () => {
-      // TODO: 이 테스트를 완성하세요
-      //
-      // 단계:
-      // 1. SecurityService 인스턴스 생성
-      // 2. hashPassword() 메서드 호출
-      // 3. 결과에 모킹된 값이 포함되어 있는지 확인
-      // 4. crypto 함수들의 호출 확인
-      //
-      // 힌트:
-      // - hashPassword는 'salt:hash' 형태로 반환됩니다
-      // - Buffer의 hex 인코딩 결과를 확인해야 할 수 있습니다
+      const securityService = new SecurityService();
+      const fakePassword = "fake-password";
+
+      const result = securityService.hashPassword(fakePassword);
+
+      expect(result).toContain(":");
+      expect(mockedCrypto.pbkdf2Sync).toHaveBeenCalledWith(fakePassword, "mocked-bytes", 10000, 64, "sha512");
     });
   });
 
@@ -83,6 +120,13 @@ describe("📦 NPM 모듈 모킹 실습", () => {
       // 3. readConfig() 메서드 호출
       // 4. 반환값이 올바른 객체인지 검증
       // 5. fs.readFile이 올바른 경로로 호출되었는지 검증
+      mockedFileSystem.readFile.mockResolvedValue('{"content": "something"}');
+      mockedPath.resolve;
+      const fileService = new FileService();
+
+      const result = await fileService.readConfig();
+
+      expect(result).toEqual({ content: "something" });
     });
 
     it("로그 파일 작성 기능 테스트하기", async () => {
@@ -94,6 +138,17 @@ describe("📦 NPM 모듈 모킹 실습", () => {
       // 3. writeLog() 메서드 호출
       // 4. 반환값 검증
       // 5. fs 메서드들이 올바르게 호출되었는지 검증
+
+      const fileService = new FileService();
+      const logData = { log: "something" };
+
+      const result = await fileService.writeLog(logData);
+
+      expect(result).toEqual({
+        timestamp: "2025-06-30",
+        id: "mocked-uuid",
+        data: logData,
+      });
     });
 
     it("파일 통계 정보 가져오기 테스트", async () => {
@@ -173,29 +228,60 @@ describe("📦 NPM 모듈 모킹 실습", () => {
 
   // ===== 6. 통합 서비스 모킹 =====
   describe("🏢 통합 서비스 모킹", () => {
-    it("모든 모듈을 함께 모킹해서 비즈니스 보고서 생성 테스트하기", async () => {
-      // TODO: 이 테스트를 완성하세요
-      //
-      // 단계:
-      // 1. 테스트 데이터 준비
-      // 2. BusinessService의 createBusinessReport 호출
-      // 3. 보고서 구조 확인
-      // 4. 모든 의존성이 호출되었는지 확인
-      //
-      // 힌트:
-      // - BusinessService는 여러 서비스를 조합해서 사용합니다
-      // - 각 서비스의 메서드들이 올바르게 호출되는지 확인하세요
+    it("createBusinessReport는 리포트 데이터를 입력하면 리포트를 반환한다.", async () => {
+      const content = '{"content":"something"}';
+      mockedFileSystem.readFile.mockResolvedValue(content);
+
+      const businessService = new BusinessService();
+
+      const fakeUser = {
+        active: true,
+        firstName: "hello",
+        lastName: "world",
+      };
+      const reportData = {
+        users: [
+          {
+            ...fakeUser,
+          },
+        ],
+      };
+
+      const result = await businessService.createBusinessReport(reportData);
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          id: "mocked-uuid",
+          data: expect.objectContaining({
+            statistics: null,
+            processed: expect.arrayContaining([
+              expect.objectContaining({
+                id: "mocked-uuid",
+                processedAt: "2025-06-30",
+                fullName: `${fakeUser.firstName} ${fakeUser.lastName}`,
+              }),
+            ]),
+          }),
+        })
+      );
     });
 
-    it("복잡한 데이터 내보내기 기능 테스트하기", async () => {
-      // TODO: 이 테스트를 완성하세요
-      //
-      // 단계:
-      // 1. 테스트 데이터 준비
-      // 2. fs 메서드들 모킹
-      // 3. BusinessService의 exportBusinessData 호출
-      // 4. 내보내기 결과 확인
-      // 5. 파일 시스템 호출 확인
+    it("exportBusinessData csv파일을 입력하면 데이터 정보가 반환된다. ", async () => {
+      const businessService = new BusinessService();
+      // jest.spyOn(businessService as any, "convertToCSV").mockReturnValue([]);
+
+      const convertToCSVMock = jest.fn();
+      convertToCSVMock.mockReturnValue([]);
+      const result = await businessService.exportBusinessData([], "csv", convertToCSVMock);
+
+      expect(convertToCSVMock).toHaveBeenCalled();
+      expect(result).toEqual({
+        exportId: "mocked-uuid",
+        timestamp: "2025-06-30",
+        format: "csv",
+        recordCount: 0,
+        data: [],
+      });
     });
 
     it("업무 스케줄링 기능의 모든 의존성 테스트하기", async () => {

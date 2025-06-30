@@ -187,7 +187,7 @@ describe("🧪 Jest Mocking과 Spy 기본 개념", () => {
 
   // ===== 4. 복잡한 서비스 Mocking =====
   describe("🏗️ 복잡한 서비스 Mocking: 여러 의존성 조합", () => {
-    it("알림 서비스는 사용자 서비스와 이메일 서비스를 함께 사용한다", async () => {
+    it("sendUserNotification은 알림을 보내고 전송결과를 반환한다.", async () => {
       // Arrange: 여러 의존성 mock 생성
       const mockEmailService: EmailService = {
         sendEmail: jest.fn().mockResolvedValue(true),

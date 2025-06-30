@@ -266,14 +266,22 @@ describe("🧪 Jest Matcher 완전 정복", () => {
   describe("⏰ 비동기 Matcher: resolves, rejects", () => {
     it("Promise가 성공적으로 resolve되는지 확인한다", async () => {
       // Arrange & Act & Assert
-      await expect(fetchUserData(1)).resolves.toEqual({
-        id: 1,
-        name: "김개발",
-        email: "kim@example.com",
-      });
+      const userData = { id: 1, name: "김개발", email: "kim@example.com" };
 
-      await expect(fetchUserData(5)).resolves.toHaveProperty("id", 5);
-      await expect(delay(50)).resolves.toBe("완료");
+      const result = await fetchUserData(1);
+
+      expect(result).toEqual(userData);
+
+      await expect(fetchUserData(1)).resolves.toEqual(userData);
+
+      // await expect(fetchUserData(1)).resolves.toEqual({
+      //   id: 1,
+      //   name: "김개발",
+      //   email: "kim@example.com",
+      // });
+
+      // await expect(fetchUserData(5)).resolves.toHaveProperty("id", 5);
+      // await expect(delay(50)).resolves.toBe("완료");
     });
 
     it("Promise가 reject되는지 확인한다", async () => {

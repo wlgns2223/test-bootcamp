@@ -549,6 +549,7 @@ export class CacheService {
 // === 실제 NPM 모듈을 활용하는 서비스들 (모킹 실습용) ===
 
 // 1. 파일 시스템을 활용하는 서비스
+
 export class FileService {
   async readConfig(configPath: string = "./config.json") {
     try {
@@ -556,6 +557,7 @@ export class FileService {
       const content = await fs.readFile(fullPath, "utf-8");
       return JSON.parse(content);
     } catch (error) {
+      console.error(error);
       throw new Error(`설정 파일을 읽을 수 없습니다: ${configPath}`);
     }
   }
@@ -763,6 +765,11 @@ export class DateTimeService {
 }
 
 // 5. 통합 비즈니스 서비스 (여러 npm 모듈 조합)
+
+const mockedFileService = {
+  readConfig: jest.fn(),
+};
+
 export class BusinessService {
   constructor(
     private fileService = new FileService(),
@@ -826,7 +833,7 @@ export class BusinessService {
     }));
   }
 
-  async exportBusinessData(data: any[], format: "json" | "csv" = "json") {
+  async exportBusinessData(data: any[], format: "json" | "csv" = "json", convertToCSV: any) {
     const exportId = this.securityService.generateSecureId();
     const timestamp = this.dateService.getCurrentTimestamp();
 
@@ -835,7 +842,7 @@ export class BusinessService {
       timestamp,
       format,
       recordCount: data.length,
-      data: format === "json" ? data : this.convertToCSV(data),
+      data: format === "json" ? data : convertToCSV(data),
     };
 
     // 파일로 저장

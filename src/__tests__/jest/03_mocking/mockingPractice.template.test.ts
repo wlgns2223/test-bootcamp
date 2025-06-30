@@ -10,6 +10,7 @@
  * 3. 완성 답안은 mockingPractice.completed.test.ts 파일을 참고하세요
  */
 
+import { fireEvent } from "@testing-library/react";
 import {
   UserService,
   EmailService,
@@ -20,7 +21,10 @@ import {
   emailService,
   utils,
   fileSystem,
+  Utils,
+  Order,
 } from "../../../utils/mockingPractice";
+import { error } from "console";
 
 describe("Jest Mocking과 Spy 실습", () => {
   beforeEach(() => {
@@ -108,7 +112,7 @@ describe("Jest Mocking과 Spy 실습", () => {
     });
   });
 
-  describe.skip("4. 복합 서비스 Mocking 실습", () => {
+  describe("4. 복합 서비스 Mocking 실습", () => {
     it("NotificationService의 종합 mocking", async () => {
       // TODO: mockEmailService를 생성하세요 (sendEmail이 true 반환)
       // TODO: mockUserService를 생성하세요
@@ -121,6 +125,46 @@ describe("Jest Mocking과 Spy 실습", () => {
       // - mockUserService.getUser가 1로 호출되었는지 확인
       // - mockEmailService.sendEmail이 올바른 인자로 호출되었는지 확인
       // - mockUserService.updateUserActivity가 호출되었는지 확인
+
+      const mockUserService = {
+        getUser: jest.fn().mockResolvedValue({ id: 1, email: "user@test.com" }),
+        updateUserActivity: jest.fn(),
+      };
+
+      const mockEmailService: EmailService = {
+        sendEmail: jest.fn().mockResolvedValue(true),
+        sendWelcomeEmail: jest.fn(),
+      };
+      const notificationService = new NotificationService(mockEmailService, mockUserService as any);
+
+      const result = await notificationService.sendUserNotification(1, "notification message");
+
+      expect(result).toBeTruthy();
+    });
+
+    it("sendBulkNotifications는 대량의 메일을 발송하고 결과값을 리턴한다.", async () => {
+      const mockUserService = {
+        getUser: jest.fn().mockResolvedValue({ id: 1, email: "user@test.com" }),
+        updateUserActivity: jest.fn(),
+      };
+
+      const mockEmailService: EmailService = {
+        sendEmail: jest.fn().mockResolvedValue(true),
+        sendWelcomeEmail: jest.fn(),
+      };
+      const notificationService = new NotificationService(mockEmailService, mockUserService as any);
+      jest.spyOn(notificationService, "sendUserNotification").mockRejectedValue(new Error("test error"));
+      const userIds = [1];
+
+      const result = await notificationService.sendBulkNotifications(userIds, "test-message");
+
+      expect(result).toEqual([
+        {
+          userId: 1,
+          success: false,
+          error: "test error",
+        },
+      ]);
     });
 
     it("OrderService의 복잡한 의존성 mocking", async () => {
@@ -131,24 +175,83 @@ describe("Jest Mocking과 Spy 실습", () => {
       // mockUserService.getUser는 사용자 정보를 반환
       // mockEmailService.sendEmail은 true를 반환
       // mockUserService.updateUserActivity는 활동 정보를 반환
+
+      const mockUserService = {
+        getUser: jest.fn().mockResolvedValue({ id: 1, email: "user@test.com" }),
+        updateUserActivity: jest.fn(),
+      };
+
+      const mockEmailService: EmailService = {
+        sendEmail: jest.fn().mockResolvedValue(true),
+        sendWelcomeEmail: jest.fn(),
+      };
+
+      const mockId = "mock-id";
+      const mockUtils: Pick<Utils, "generateId"> = {
+        generateId: jest.fn().mockReturnValue(mockId),
+      };
+      const mockItems: Order["items"] = [
+        { name: "first-item", price: 10, quantity: 10 },
+        { name: "second-item", price: 10, quantity: 10 },
+      ];
+      const mockUserId = 1;
+      const mockOrder: Order = {
+        id: mockId,
+        userId: mockUserId,
+        items: mockItems,
+        status: "pending",
+        total: 200,
+      };
+
+      const orderService = new OrderService(mockUserService as any, mockEmailService, mockUtils as any);
+
+      const result = await orderService.createOrder(mockUserId, mockItems);
+
+      expect(result).toEqual(mockOrder);
     });
   });
 
-  describe.skip("5. 파일 시스템 Mocking 실습", () => {
-    it("파일 읽기 성공/실패 시나리오", async () => {
+  describe("5. 파일 시스템 Mocking 실습", () => {
+    it("파일 읽기 성공 시나리오", async () => {
       // TODO: fileSystem.readFile을 spy로 만드세요
       // TODO: 첫 번째 호출에서는 '파일 내용'을 반환하도록 설정
       // TODO: 두 번째 호출에서는 에러를 던지도록 설정
       // TODO: 성공 케이스와 실패 케이스를 모두 테스트하세요
+
+      const readFileSpy = jest.spyOn(fileSystem, "readFile");
+      readFileSpy.mockResolvedValue("파일 내용");
+
+      const result = await fileSystem.readFile("");
+
+      expect(result).toContain("파일 내용");
+    });
+    it("파일 읽기 실패 시나리오", async () => {
+      // TODO: fileSystem.readFile을 spy로 만드세요
+      // TODO: 첫 번째 호출에서는 '파일 내용'을 반환하도록 설정
+      // TODO: 두 번째 호출에서는 에러를 던지도록 설정
+      const readFileSpy = jest.spyOn(fileSystem, "readFile");
+      readFileSpy.mockRejectedValue(new Error("mock error"));
+
+      await expect(fileSystem.readFile("")).rejects.toThrow(Error);
     });
   });
 
-  describe.skip("6. 실시간 함수 Mocking 실습", () => {
+  describe("6. 실시간 함수 Mocking 실습", () => {
     it("Date.now() mocking", () => {
       // TODO: Date.now를 spy로 만들고 고정된 시간을 반환하도록 설정하세요
       // 예: 1234567890000
       // TODO: Date.now()를 호출하고 설정한 값이 반환되는지 확인하세요
       // TODO: spy를 복원하세요
+
+      const nowSpy = jest.spyOn(Date, "now");
+      const mockTime = 1234567890000;
+      nowSpy.mockReturnValue(mockTime);
+
+      const result = Date.now();
+
+      expect(result).toBe(mockTime);
+
+      nowSpy.mockRestore();
     });
 
     it("Math.random() mocking", () => {
@@ -156,6 +259,14 @@ describe("Jest Mocking과 Spy 실습", () => {
       // TODO: utils.generateId()를 호출했을 때 예측 가능한 값이 나오는지 확인하세요
       // (Math.random이 mocking되어 있으므로 항상 같은 ID가 생성됨)
       // TODO: spy를 복원하세요
+
+      const randomSpy = jest.spyOn(Math, "random");
+      randomSpy.mockReturnValue(0.5);
+
+      const id1 = utils.generateId();
+      const id2 = utils.generateId();
+
+      expect(id1).toBe(id2);
     });
   });
 
