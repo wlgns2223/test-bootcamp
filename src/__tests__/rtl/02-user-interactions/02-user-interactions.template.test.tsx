@@ -24,13 +24,25 @@ import SelectionForm from "../../../components/SelectionForm";
 
 describe("RTL 사용자 상호작용 - 클릭 이벤트 (실습)", () => {
   // 🎯 실습 1: 기본 클릭 이벤트
-  it("버튼 클릭이 작동한다", async () => {
+  it("버튼을 클릭하면 클릭 이벤트 핸들러가 호출된다", async () => {
     // TODO: userEvent 인스턴스를 생성하세요 (userEvent.setup() 사용)
     // TODO: jest.fn()을 사용해서 mock 함수를 생성하세요
     // TODO: Button 컴포넌트를 onClick prop과 함께 렌더링하세요
     // TODO: getByRole을 사용해서 버튼을 찾으세요
     // TODO: user.click()을 사용해서 버튼을 클릭하세요 (await 필요)
     // TODO: mock 함수가 1번 호출되었는지 확인하세요 (toHaveBeenCalledTimes 사용)
+
+    const user = userEvent.setup();
+    const handleClickMock = jest.fn();
+
+    render(<Button onClick={handleClickMock}>click</Button>);
+
+    const button = screen.getByRole("button");
+
+    await user.click(button);
+
+    expect(button).toBeInTheDocument();
+    expect(handleClickMock).toHaveBeenCalled();
   });
 
   // 🎯 실습 2: 여러 번 클릭
@@ -86,6 +98,17 @@ describe("RTL 사용자 상호작용 - 클릭 이벤트 (실습)", () => {
 });
 
 describe("RTL 폼 입력 상호작용 (실습)", () => {
+  const renderAndFindInputs = (handleSubmitMock?: ReturnType<typeof jest.fn>) => {
+    render(<UserForm onSubmit={handleSubmitMock} />);
+    const nameInput = screen.getByRole("textbox", { name: /name/i });
+    const emailInput = screen.getByRole("textbox", { name: /email/i });
+
+    return {
+      nameInput,
+      emailInput,
+    };
+  };
+
   // 🎯 실습 1: 텍스트 입력 필드 타이핑
   it("텍스트 입력 필드에 타이핑할 수 있다", async () => {
     // TODO: userEvent 인스턴스를 생성하세요
@@ -97,6 +120,18 @@ describe("RTL 폼 입력 상호작용 (실습)", () => {
     // TODO: name 필드의 값이 "John Doe"인지 확인하세요 (toHaveValue 사용)
     // TODO: user.type()을 사용해서 email 필드에 "john@example.com"을 입력하세요
     // TODO: email 필드의 값이 "john@example.com"인지 확인하세요
+
+    const user = userEvent.setup();
+    render(<UserForm />);
+
+    const nameInput = screen.getByRole("textbox", { name: /name/i });
+    const emailInput = screen.getByRole("textbox", { name: /email/i });
+
+    await user.type(nameInput, "hello");
+    await user.type(emailInput, "hello@gmail.com");
+
+    expect(nameInput).toHaveValue("hello");
+    expect(emailInput).toHaveValue("hello@gmail.com");
   });
 
   // 🎯 실습 2: 입력 필드 포커스/블러
@@ -109,6 +144,16 @@ describe("RTL 폼 입력 상호작용 (실습)", () => {
     // TODO: email 입력 필드를 클릭하세요
     // TODO: email 입력 필드에 포커스가 있는지 확인하세요
     // TODO: name 입력 필드에 포커스가 없는지 확인하세요 (not.toHaveFocus 사용)
+
+    const user = userEvent.setup();
+    const { emailInput, nameInput } = renderAndFindInputs();
+
+    await user.click(nameInput);
+    expect(nameInput).toHaveFocus();
+
+    await user.click(emailInput);
+    expect(emailInput).toHaveFocus();
+    expect(nameInput).not.toHaveFocus();
   });
 
   // 🎯 실습 3: 입력값 변경 감지
@@ -122,6 +167,15 @@ describe("RTL 폼 입력 상호작용 (실습)", () => {
     // TODO: 입력 필드 값이 "AB"인지 확인하세요
     // TODO: user.clear()를 사용해서 입력 필드를 지우세요
     // TODO: 입력 필드 값이 빈 문자열인지 확인하세요
+
+    const user = userEvent.setup();
+    const { nameInput } = renderAndFindInputs();
+
+    await user.type(nameInput, "A");
+    expect(nameInput).toHaveValue("A");
+
+    await user.type(nameInput, "B");
+    expect(nameInput).toHaveValue("AB");
   });
 
   // 🎯 실습 4: 폼 제출 상호작용
@@ -134,6 +188,20 @@ describe("RTL 폼 입력 상호작용 (실습)", () => {
     // TODO: 이제 submit 버튼이 활성화되어 있는지 확인하세요 (toBeEnabled 사용)
     // TODO: submit 버튼을 클릭하세요
     // TODO: mock 함수가 올바른 데이터와 함께 호출되었는지 확인하세요 (toHaveBeenCalledWith 사용)
+
+    const user = userEvent.setup();
+    const handleSubmitMock = jest.fn();
+    const { emailInput, nameInput } = renderAndFindInputs(handleSubmitMock);
+    const submitButton = screen.getByRole("button");
+
+    expect(submitButton).toBeDisabled();
+
+    await user.type(nameInput, "foo");
+    await user.type(emailInput, "test@example.com");
+    expect(submitButton).toBeEnabled();
+
+    await user.click(submitButton);
+    expect(handleSubmitMock).toHaveBeenCalled();
   });
 });
 

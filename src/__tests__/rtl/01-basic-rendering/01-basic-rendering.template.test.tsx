@@ -103,6 +103,11 @@ describe("RTL 기본 사용법 - Button 컴포넌트 (실습)", () => {
     render(<Button>Only Button</Button>);
 
     // TODO: queryByRole을 사용해서 존재하지 않는 "textbox" role을 찾으세요
+    // input 태그의 ARIA-Role === 'textbox'
+    const textbox = screen.queryByRole("textbox");
+
+    expect(textbox).toBeNull();
+    expect(textbox).not.toBeInTheDocument();
 
     // TODO: 찾은 요소가 DOM에 존재하지 않는지 확인하세요 (not.toBeInTheDocument 사용)
 
@@ -122,6 +127,13 @@ describe("getBy* 실습", () => {
     // TODO: getByRole을 사용해서 "article" role을 가진 요소를 찾으세요
     // TODO: 두 요소가 모두 DOM에 존재하는지 확인하세요
     // TODO: 버튼의 텍스트가 "첫 번째 버튼"인지 확인하세요
+
+    // label, aria-label,aria-labelledby, textContent -> name으로 찾아짐
+    const firstButton = screen.getByRole("button", { name: "첫 번째 버튼" });
+    expect(firstButton).toBeInTheDocument();
+
+    const buttons = screen.getAllByRole("button");
+    expect(buttons).toHaveLength(3);
   });
 
   // 🎯 실습 7: 여러 요소 중 첫 번째 찾기
@@ -140,6 +152,12 @@ describe("getBy* 실습", () => {
     // TODO: getByText를 사용해서 "정보 텍스트"를 찾으세요
     // TODO: getByText를 사용해서 "라벨"을 찾으세요
     // TODO: 두 요소가 모두 DOM에 존재하는지 확인하세요
+
+    const informationText = screen.getByText("정보 텍스트");
+    expect(informationText).toBeInTheDocument();
+
+    const label = screen.getByText("라벨");
+    expect(label).toBeInTheDocument();
   });
 
   // 🎯 실습 9: getByRole로 존재하지 않는 요소 찾기 (에러 발생)
@@ -149,6 +167,10 @@ describe("getBy* 실습", () => {
     // TODO: expect와 화살표 함수를 사용해서 getByRole("textbox")가 에러를 던지는지 확인하세요
     // TODO: expect와 화살표 함수를 사용해서 getByText("존재하지 않는 텍스트")가 에러를 던지는지 확인하세요
     // 힌트: expect(() => function()).toThrow() 형태를 사용하세요
+
+    // Role "textbox" -> input Tag
+
+    expect(() => screen.getByRole("textbox")).toThrow();
   });
 
   // 🎯 실습 10: 조건부 요소 찾기
@@ -157,6 +179,12 @@ describe("getBy* 실습", () => {
     // TODO: getByRole을 사용해서 "banner" role을 가진 요소를 찾으세요
     // TODO: 찾은 요소가 DOM에 존재하는지 확인하세요
     // TODO: 찾은 요소의 텍스트가 "조건부 요소"인지 확인하세요
+
+    render(<ConditionalComponent show={true} />);
+
+    const banner = screen.getByRole("banner");
+
+    expect(banner).toBeInTheDocument();
   });
 });
 
@@ -169,6 +197,11 @@ describe("queryBy* 실습", () => {
     // TODO: queryByText를 사용해서 존재하지 않는 "존재하지 않는 텍스트"를 찾으세요
     // TODO: 두 결과가 모두 null인지 확인하세요
     // TODO: 첫 번째 결과가 DOM에 존재하지 않는지 확인하세요 (not.toBeInTheDocument 사용)
+
+    const input = screen.queryByRole("textbox");
+
+    expect(input).toBeNull();
+    expect(input).not.toBeInTheDocument();
   });
 
   // 🎯 실습 12: 조건부 렌더링 테스트
@@ -179,6 +212,16 @@ describe("queryBy* 실습", () => {
     // TODO: rerender를 사용해서 ConditionalComponent를 show={true}로 다시 렌더링하세요
     // TODO: getByRole을 사용해서 "banner" role을 찾으세요
     // TODO: 이제 요소가 DOM에 존재하는지 확인하세요
+
+    const { rerender } = render(<ConditionalComponent show={false} />);
+
+    const bannerNotExit = screen.queryByRole("banner");
+    expect(bannerNotExit).not.toBeInTheDocument();
+
+    rerender(<ConditionalComponent show={true} />);
+
+    const bannerExit = screen.queryByRole("banner");
+    expect(bannerExit).toBeInTheDocument();
   });
 
   // 🎯 실습 13: 요소 제거 테스트
@@ -194,6 +237,14 @@ describe("queryBy* 실습", () => {
     // TODO: ConditionalComponent를 show={false}로 렌더링하세요
     // TODO: getByRole을 사용해서 "main" role을 찾고 DOM에 존재하는지 확인하세요
     // TODO: queryByRole을 사용해서 "banner" role을 찾고 DOM에 존재하지 않는지 확인하세요
+
+    render(<ConditionalComponent show={false} />);
+
+    const main = screen.getByRole("main");
+    expect(main).toBeInTheDocument();
+
+    const banner = screen.queryByRole("banner");
+    expect(banner).not.toBeInTheDocument();
   });
 });
 
