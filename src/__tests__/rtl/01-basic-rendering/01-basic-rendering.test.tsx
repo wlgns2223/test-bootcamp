@@ -30,6 +30,12 @@ describe("RTL 기본 사용법 - Button 컴포넌트", () => {
     render(<Button>Click me</Button>);
 
     // getByRole: 접근성 role로 요소 찾기 (가장 권장)
+
+    // findBy*, findAllBy*
+    // getBy*, getAllBy*
+    // queryBy*, queryAllBy*
+
+    // role ? -> ARIA-ROLE
     const button = screen.getByRole("button");
 
     expect(button).toBeInTheDocument();
@@ -74,6 +80,17 @@ describe("RTL 기본 사용법 - Button 컴포넌트", () => {
 
     // getByRole: 없으면 에러 발생
     // queryByRole: 없으면 null 반환
+
+    // 다른 메소드가 있는 이유 -> '의도'의 차이
+    // queryBy* -> DOM에 어떤 요소가 '없는지' 확인할때
+    // getBy* -> DOM에 어떤 요소가 '있는지' 확인할때
+
+    // input ARIA-Role -> textbox
+    // 에러
+    // const button = screen.getByRole("textbox");
+
+    // queryBy*
+    // null을 반환
     const nonExistentElement = screen.queryByRole("textbox");
     expect(nonExistentElement).not.toBeInTheDocument();
 

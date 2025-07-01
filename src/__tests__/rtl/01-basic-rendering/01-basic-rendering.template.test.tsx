@@ -35,6 +35,25 @@ describe("RTL 기본 사용법 - Button 컴포넌트 (실습)", () => {
     // TODO: getByRole을 사용해서 "button" role을 가진 요소를 찾으세요
     // TODO: 버튼이 DOM에 존재하는지 확인하세요
     // TODO: 버튼의 텍스트가 "Click me"인지 확인하세요
+
+    // Arrange
+    render(<Button>codeit</Button>);
+
+    // getByRole -> jest-dom에서 요소를 찾으면 요소를 반환하고
+    // 못찾으면 에러를 던짐
+    const button = screen.getByRole("button");
+
+    expect(button).toBeInTheDocument();
+    expect(button).toHaveTextContent("codeit");
+  });
+
+  it("버튼을 못찾으면 에러를 던진다.", () => {
+    render(<input />);
+
+    // 에러가 던져짐
+    // const button = screen.getByRole("button")
+
+    expect(() => screen.getByRole("button")).toThrow();
   });
 
   // 🎯 실습 2: role로 요소 찾기
@@ -53,16 +72,30 @@ describe("RTL 기본 사용법 - Button 컴포넌트 (실습)", () => {
     // TODO: Button 컴포넌트를 data-testid="my-button"과 "Test Button" 텍스트로 렌더링하세요
     // TODO: getByTestId를 사용해서 "my-button" testid를 가진 요소를 찾으세요
     // TODO: 버튼이 DOM에 존재하는지 확인하세요
+
+    render(<Button data-testid="test-button">Test Button</Button>);
+
+    const button = screen.getByTestId("test-button");
+
+    expect(button).toBeInTheDocument();
+    expect(button).toHaveTextContent("Test Button");
   });
 
   // 🎯 실습 4: 요소의 속성 확인
-  it("버튼의 속성을 확인할 수 있다", () => {
+  it("disabled props를 전달하면 버튼이 비활성화 된다.", () => {
     // TODO: 비활성화된 Button 컴포넌트를 "Disabled Button" 텍스트로 렌더링하세요
     // 힌트: disabled prop을 사용하세요
     // TODO: getByRole을 사용해서 버튼을 찾으세요
     // TODO: 버튼이 비활성화되어 있는지 확인하세요 (toBeDisabled 사용)
     // TODO: 버튼이 특정 CSS 클래스들을 가지고 있는지 확인하세요
     // 힌트: "px-4", "py-2", "rounded" 클래스들을 확인해보세요
+
+    render(<Button disabled={true}>disabled button</Button>);
+
+    const button = screen.getByRole("button");
+
+    expect(button).toBeInTheDocument();
+    expect(button).toBeDisabled();
   });
 
   // 🎯 실습 5: queryBy와 getBy의 차이
