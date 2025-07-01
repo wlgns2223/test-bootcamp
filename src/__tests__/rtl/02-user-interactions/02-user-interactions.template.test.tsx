@@ -218,6 +218,22 @@ describe("RTL 선택 요소 상호작용 (실습)", () => {
     // TODO: Reading 체크박스를 다시 클릭해서 해제하세요
     // TODO: Reading 체크박스가 해제되었는지 확인하세요 (not.toBeChecked 사용)
     // TODO: Gaming 체크박스는 여전히 선택되어 있는지 확인하세요
+
+    const user = userEvent.setup();
+    render(<SelectionForm />);
+
+    const readingCheckbox = screen.getByRole("checkbox", { name: /reading/i });
+    const gamingCheckbox = screen.getByRole("checkbox", { name: /gaming/i });
+
+    await user.click(readingCheckbox);
+    await user.click(gamingCheckbox);
+
+    expect(readingCheckbox).toBeChecked();
+    expect(gamingCheckbox).toBeChecked();
+
+    await user.click(readingCheckbox);
+    expect(readingCheckbox).not.toBeChecked();
+    expect(gamingCheckbox).toBeChecked();
   });
 
   // 🎯 실습 2: 라디오 버튼 선택
@@ -231,6 +247,25 @@ describe("RTL 선택 요소 상호작용 (실습)", () => {
     // TODO: Female 라디오 버튼을 클릭하세요
     // TODO: Female 라디오 버튼이 선택되었는지 확인하세요
     // TODO: Male과 Other 라디오 버튼이 선택되지 않았는지 확인하세요
+
+    const user = userEvent.setup();
+    const handleChangeMock = jest.fn();
+    render(<SelectionForm onSelectionChange={handleChangeMock} />);
+
+    const maleRadioButton = screen.getByRole("radio", { name: /^male$/i });
+    const femaleRadioButton = screen.getByRole("radio", { name: /^female$/i });
+    const otherRadioButton = screen.getByRole("radio", { name: /^other$/i });
+
+    await user.click(maleRadioButton);
+    expect(maleRadioButton).toBeChecked();
+    expect(femaleRadioButton).not.toBeChecked();
+    expect(otherRadioButton).not.toBeChecked();
+
+    expect(handleChangeMock).toHaveBeenCalledWith({
+      hobbies: [],
+      gender: "Male",
+      notifications: false,
+    });
   });
 
   // 🎯 실습 3: 선택 상태 변경 감지
