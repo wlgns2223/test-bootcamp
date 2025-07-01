@@ -25,11 +25,17 @@ function AsyncComponent() {
 
   return (
     <div>
-      <button onClick={fetchData} data-testid="fetch-button">
-        Fetch Data
-      </button>
-      {loading && <div data-testid="loading">Loading...</div>}
-      {data && <div data-testid="success-data">{data}</div>}
+      <button onClick={fetchData}>Fetch Data</button>
+      {loading && (
+        <div role="status" aria-live="polite">
+          Loading...
+        </div>
+      )}
+      {data && (
+        <div role="status" aria-live="polite">
+          {data}
+        </div>
+      )}
     </div>
   );
 }
@@ -49,8 +55,9 @@ describe("RTL 비동기 테스트 (정답)", () => {
     const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     render(<AsyncComponent />);
 
-    await user.click(screen.getByTestId("fetch-button"));
-    expect(screen.getByTestId("loading")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Fetch Data" }));
+    expect(screen.getByRole("status")).toBeInTheDocument();
+    expect(screen.getByRole("status")).toHaveTextContent("Loading...");
   });
 
   // ✅ 정답 2: waitFor를 사용한 데이터 로딩 완료 대기
@@ -59,11 +66,11 @@ describe("RTL 비동기 테스트 (정답)", () => {
     jest.spyOn(Math, "random").mockReturnValue(0.6);
 
     render(<AsyncComponent />);
-    await user.click(screen.getByTestId("fetch-button"));
+    await user.click(screen.getByRole("button", { name: "Fetch Data" }));
     jest.advanceTimersByTime(1000);
 
     await waitFor(() => {
-      expect(screen.getByTestId("success-data")).toBeInTheDocument();
+      expect(screen.getByRole("status")).toHaveTextContent("Successfully fetched data!");
     });
 
     jest.restoreAllMocks();
@@ -75,10 +82,10 @@ describe("RTL 비동기 테스트 (정답)", () => {
     jest.spyOn(Math, "random").mockReturnValue(0.7);
 
     render(<AsyncComponent />);
-    await user.click(screen.getByTestId("fetch-button"));
+    await user.click(screen.getByRole("button", { name: "Fetch Data" }));
     jest.advanceTimersByTime(1000);
 
-    const successData = await screen.findByTestId("success-data");
+    const successData = await screen.findByText("Successfully fetched data!");
     expect(successData).toHaveTextContent("Successfully fetched data!");
 
     jest.restoreAllMocks();
@@ -88,6 +95,7 @@ describe("RTL 비동기 테스트 (정답)", () => {
 /**
  * 💡 정답 해설:
  * - waitFor: 조건이 만족될 때까지 반복 확인
- * - findBy: 요소가 나타날 때까지 자동 대기
+ * - findByText: 텍스트가 나타날 때까지 자동 대기
+ * - getByRole: 접근성 기반 요소 찾기 (버튼, 상태 메시지)
  * - 타이머 모킹으로 비동기 동작 제어
  */

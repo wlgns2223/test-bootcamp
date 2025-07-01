@@ -42,13 +42,19 @@ function AsyncComponent() {
 
   return (
     <div>
-      <button onClick={fetchData} data-testid="fetch-button">
-        Fetch Data
-      </button>
+      <button onClick={fetchData}>Fetch Data</button>
 
-      {loading && <div data-testid="loading">Loading...</div>}
-      {data && <div data-testid="success-data">{data}</div>}
-      {error && <div data-testid="error-message">{error}</div>}
+      {loading && (
+        <div role="status" aria-live="polite">
+          Loading...
+        </div>
+      )}
+      {data && (
+        <div role="status" aria-live="polite">
+          {data}
+        </div>
+      )}
+      {error && <div role="alert">{error}</div>}
     </div>
   );
 }
@@ -65,7 +71,11 @@ function AutoLoadingComponent() {
     return () => clearTimeout(timer);
   }, []);
 
-  return <div data-testid="auto-message">{message}</div>;
+  return (
+    <div role="status" aria-live="polite">
+      {message}
+    </div>
+  );
 }
 
 describe("RTL 비동기 테스트", () => {
@@ -83,10 +93,9 @@ describe("RTL 비동기 테스트", () => {
   it("초기에는 버튼만 표시된다", () => {
     render(<AsyncComponent />);
 
-    expect(screen.getByTestId("fetch-button")).toBeInTheDocument();
-    expect(screen.queryByTestId("loading")).not.toBeInTheDocument();
-    expect(screen.queryByTestId("success-data")).not.toBeInTheDocument();
-    expect(screen.queryByTestId("error-message")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Fetch Data" })).toBeInTheDocument();
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
 
   // 2. 로딩 상태 테스트
@@ -95,13 +104,14 @@ describe("RTL 비동기 테스트", () => {
 
     render(<AsyncComponent />);
 
-    const fetchButton = screen.getByTestId("fetch-button");
+    const fetchButton = screen.getByRole("button", { name: "Fetch Data" });
 
     // 버튼 클릭
     await user.click(fetchButton);
 
     // 로딩 상태 즉시 확인
-    expect(screen.getByTestId("loading")).toBeInTheDocument();
+    expect(screen.getByRole("status")).toBeInTheDocument();
+    expect(screen.getByRole("status")).toHaveTextContent("Loading...");
   });
 
   // 3. waitFor를 사용한 비동기 상태 변화 대기
@@ -113,7 +123,7 @@ describe("RTL 비동기 테스트", () => {
 
     render(<AsyncComponent />);
 
-    const fetchButton = screen.getByTestId("fetch-button");
+    const fetchButton = screen.getByRole("button", { name: "Fetch Data" });
     await user.click(fetchButton);
 
     // 타이머를 1초 진행
@@ -121,11 +131,11 @@ describe("RTL 비동기 테스트", () => {
 
     // waitFor를 사용하여 성공 데이터가 나타날 때까지 대기
     await waitFor(() => {
-      expect(screen.getByTestId("success-data")).toBeInTheDocument();
+      expect(screen.getByRole("status")).toHaveTextContent("Successfully fetched data!");
     });
 
     // 로딩이 사라졌는지 확인
-    expect(screen.queryByTestId("loading")).not.toBeInTheDocument();
+    expect(screen.queryByText("Loading...")).not.toBeInTheDocument();
 
     // Math.random 모킹 복원
     jest.restoreAllMocks();
@@ -140,14 +150,14 @@ describe("RTL 비동기 테스트", () => {
 
     render(<AsyncComponent />);
 
-    const fetchButton = screen.getByTestId("fetch-button");
+    const fetchButton = screen.getByRole("button", { name: "Fetch Data" });
     await user.click(fetchButton);
 
     // 타이머 진행
     jest.advanceTimersByTime(1000);
 
-    // findByTestId는 요소가 나타날 때까지 자동으로 대기
-    const successData = await screen.findByTestId("success-data");
+    // findByText는 요소가 나타날 때까지 자동으로 대기
+    const successData = await screen.findByText("Successfully fetched data!");
     expect(successData).toBeInTheDocument();
     expect(successData).toHaveTextContent("Successfully fetched data!");
 
@@ -163,19 +173,19 @@ describe("RTL 비동기 테스트", () => {
 
     render(<AsyncComponent />);
 
-    const fetchButton = screen.getByTestId("fetch-button");
+    const fetchButton = screen.getByRole("button", { name: "Fetch Data" });
     await user.click(fetchButton);
 
     // 타이머 진행
     jest.advanceTimersByTime(1000);
 
     // 에러 메시지가 나타날 때까지 대기
-    const errorMessage = await screen.findByTestId("error-message");
+    const errorMessage = await screen.findByRole("alert");
     expect(errorMessage).toBeInTheDocument();
     expect(errorMessage).toHaveTextContent("Failed to fetch data");
 
     // 로딩이 사라졌는지 확인
-    expect(screen.queryByTestId("loading")).not.toBeInTheDocument();
+    expect(screen.queryByText("Loading...")).not.toBeInTheDocument();
 
     jest.restoreAllMocks();
   });
@@ -185,16 +195,14 @@ describe("RTL 비동기 테스트", () => {
     render(<AutoLoadingComponent />);
 
     // 초기 로딩 메시지 확인
-    expect(screen.getByTestId("auto-message")).toHaveTextContent("Loading...");
+    expect(screen.getByRole("status")).toHaveTextContent("Loading...");
 
     // 500ms 후 내용 변경
     jest.advanceTimersByTime(500);
 
     // 변경된 내용 확인
     await waitFor(() => {
-      expect(screen.getByTestId("auto-message")).toHaveTextContent(
-        "Content loaded!"
-      );
+      expect(screen.getByRole("status")).toHaveTextContent("Content loaded!");
     });
   });
 
@@ -222,13 +230,15 @@ describe("RTL 비동기 테스트", () => {
  * 💡 학습 포인트:
  *
  * 1. waitFor() - 조건이 만족될 때까지 대기
- * 2. findBy*() - 요소가 나타날 때까지 자동으로 대기하는 쿼리
- * 3. jest.useFakeTimers() - 시간 기반 동작을 제어
- * 4. jest.advanceTimersByTime() - 타이머를 수동으로 진행
- * 5. Math.random 모킹으로 랜덤 동작 제어
- * 6. 로딩/성공/에러 상태의 순차적 테스트
- * 7. useEffect 훅과 자동 실행되는 비동기 동작 테스트
- * 8. waitFor의 timeout 옵션
- * 9. 비동기 상태 변화 패턴 테스트
- * 10. 타이머 정리 (beforeEach/afterEach)
+ * 2. findByText() - 텍스트가 나타날 때까지 자동으로 대기하는 쿼리
+ * 3. getByRole() - 접근성 기반 요소 찾기 (버튼, 상태, 알림)
+ * 4. jest.useFakeTimers() - 시간 기반 동작을 제어
+ * 5. jest.advanceTimersByTime() - 타이머를 수동으로 진행
+ * 6. Math.random 모킹으로 랜덤 동작 제어
+ * 7. 로딩/성공/에러 상태의 순차적 테스트
+ * 8. useEffect 훅과 자동 실행되는 비동기 동작 테스트
+ * 9. waitFor의 timeout 옵션
+ * 10. 비동기 상태 변화 패턴 테스트
+ * 11. 타이머 정리 (beforeEach/afterEach)
+ * 12. 접근성 역할(role)을 활용한 테스트
  */

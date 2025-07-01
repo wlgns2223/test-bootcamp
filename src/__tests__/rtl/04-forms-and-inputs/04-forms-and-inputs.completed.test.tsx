@@ -27,12 +27,12 @@ describe("RTL 폼 테스트 - UserForm 컴포넌트 (정답)", () => {
     expect(screen.getByLabelText(/name/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
 
-    // ✅ 초기값이 비어있는지 확인
-    expect(screen.getByTestId("name-input")).toHaveValue("");
-    expect(screen.getByTestId("email-input")).toHaveValue("");
+    // ✅ getByRole을 사용해서 초기값이 비어있는지 확인
+    expect(screen.getByRole("textbox", { name: /name/i })).toHaveValue("");
+    expect(screen.getByRole("textbox", { name: /email/i })).toHaveValue("");
 
-    // ✅ 제출 버튼이 비활성화되어 있는지 확인
-    expect(screen.getByTestId("submit-button")).toBeDisabled();
+    // ✅ getByRole을 사용해서 제출 버튼이 비활성화되어 있는지 확인
+    expect(screen.getByRole("button", { name: /submit/i })).toBeDisabled();
   });
 
   // ✅ 정답 2: 텍스트 입력 테스트
@@ -41,8 +41,8 @@ describe("RTL 폼 테스트 - UserForm 컴포넌트 (정답)", () => {
     const user = userEvent.setup();
     render(<UserForm />);
 
-    // ✅ name-input을 찾기
-    const nameInput = screen.getByTestId("name-input");
+    // ✅ getByRole을 사용해서 name 입력 필드를 찾기
+    const nameInput = screen.getByRole("textbox", { name: /name/i });
 
     // ✅ user.type()을 사용해서 "John Doe"를 입력
     await user.type(nameInput, "John Doe");
@@ -56,8 +56,8 @@ describe("RTL 폼 테스트 - UserForm 컴포넌트 (정답)", () => {
     const user = userEvent.setup();
     render(<UserForm />);
 
-    // ✅ email-input을 찾고 "john@example.com"을 입력
-    const emailInput = screen.getByTestId("email-input");
+    // ✅ getByRole을 사용해서 email 입력 필드를 찾고 "john@example.com"을 입력
+    const emailInput = screen.getByRole("textbox", { name: /email/i });
     await user.type(emailInput, "john@example.com");
 
     // ✅ 입력된 값이 올바른지 확인
@@ -70,9 +70,9 @@ describe("RTL 폼 테스트 - UserForm 컴포넌트 (정답)", () => {
     const user = userEvent.setup();
     render(<UserForm />);
 
-    // ✅ name-input과 submit-button을 찾기
-    const nameInput = screen.getByTestId("name-input");
-    const submitButton = screen.getByTestId("submit-button");
+    // ✅ getByRole을 사용해서 name 입력 필드와 submit 버튼을 찾기
+    const nameInput = screen.getByRole("textbox", { name: /name/i });
+    const submitButton = screen.getByRole("button", { name: /submit/i });
 
     // ✅ 이름만 "John"을 입력
     await user.type(nameInput, "John");
@@ -87,10 +87,10 @@ describe("RTL 폼 테스트 - UserForm 컴포넌트 (정답)", () => {
     const user = userEvent.setup();
     render(<UserForm />);
 
-    // ✅ 모든 입력 필드와 제출 버튼을 찾기
-    const nameInput = screen.getByTestId("name-input");
-    const emailInput = screen.getByTestId("email-input");
-    const submitButton = screen.getByTestId("submit-button");
+    // ✅ getByRole을 사용해서 모든 입력 필드와 제출 버튼을 찾기
+    const nameInput = screen.getByRole("textbox", { name: /name/i });
+    const emailInput = screen.getByRole("textbox", { name: /email/i });
+    const submitButton = screen.getByRole("button", { name: /submit/i });
 
     // ✅ 이름과 이메일을 모두 입력
     await user.type(nameInput, "John Doe");
@@ -109,10 +109,10 @@ describe("RTL 폼 테스트 - UserForm 컴포넌트 (정답)", () => {
     // ✅ mockOnSubmit을 props로 전달하여 UserForm을 렌더링
     render(<UserForm onSubmit={mockOnSubmit} />);
 
-    // ✅ 입력 필드들과 제출 버튼을 찾기
-    const nameInput = screen.getByTestId("name-input");
-    const emailInput = screen.getByTestId("email-input");
-    const submitButton = screen.getByTestId("submit-button");
+    // ✅ getByRole을 사용해서 입력 필드들과 제출 버튼을 찾기
+    const nameInput = screen.getByRole("textbox", { name: /name/i });
+    const emailInput = screen.getByRole("textbox", { name: /email/i });
+    const submitButton = screen.getByRole("button", { name: /submit/i });
 
     // ✅ 폼에 데이터를 입력
     await user.type(nameInput, "Jane Smith");
@@ -133,10 +133,10 @@ describe("RTL 폼 테스트 - UserForm 컴포넌트 (정답)", () => {
     const user = userEvent.setup();
     render(<UserForm />);
 
-    // ✅ 필요한 요소들을 찾기
-    const nameInput = screen.getByTestId("name-input");
-    const emailInput = screen.getByTestId("email-input");
-    const submitButton = screen.getByTestId("submit-button");
+    // ✅ getByRole을 사용해서 필요한 요소들을 찾기
+    const nameInput = screen.getByRole("textbox", { name: /name/i });
+    const emailInput = screen.getByRole("textbox", { name: /email/i });
+    const submitButton = screen.getByRole("button", { name: /submit/i });
 
     // ✅ 폼에 데이터를 입력하고 제출
     await user.type(nameInput, "Alice Cooper");
@@ -147,12 +147,10 @@ describe("RTL 폼 테스트 - UserForm 컴포넌트 (정답)", () => {
     expect(screen.getByTestId("success-message")).toBeInTheDocument();
 
     // ✅ 성공 메시지 텍스트가 올바른지 확인
-    expect(
-      screen.getByText("Form submitted successfully!")
-    ).toBeInTheDocument();
+    expect(screen.getByText("Form submitted successfully!")).toBeInTheDocument();
 
     // ✅ 폼이 더 이상 보이지 않는지 확인
-    expect(screen.queryByTestId("name-input")).not.toBeInTheDocument();
+    expect(screen.queryByRole("textbox", { name: /name/i })).not.toBeInTheDocument();
   });
 });
 
@@ -168,8 +166,9 @@ describe("RTL 폼 테스트 - UserForm 컴포넌트 (정답)", () => {
  *
  * 🔍 쿼리 전략:
  * - getByLabelText() - 폼 요소는 label로 찾는 것이 가장 접근성 친화적
- * - getByTestId() - 정확한 요소 식별이 필요할 때
- * - queryByTestId() - 요소가 사라졌는지 확인할 때
+ * - getByRole() - 역할과 접근성 이름으로 요소 찾기 (권장)
+ * - queryByRole() - 요소가 사라졌는지 확인할 때
+ * - getByTestId() - 정확한 요소 식별이 필요할 때 (성공 메시지 등)
  *
  * ✅ 검증 패턴:
  * - toHaveValue() - input의 현재 값 확인
@@ -182,4 +181,5 @@ describe("RTL 폼 테스트 - UserForm 컴포넌트 (정답)", () => {
  * - 사용자 경험(UX) 테스트
  * - 에러 처리 및 성공 피드백 테스트
  * - 접근성 고려한 테스트 작성
+ * - 실제 사용자가 어떻게 요소를 인식하는지와 동일한 방식으로 테스트
  */
