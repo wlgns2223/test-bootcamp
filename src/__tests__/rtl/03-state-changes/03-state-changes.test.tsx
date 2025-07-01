@@ -19,7 +19,7 @@ describe("RTL 상태 변화 테스트 - Counter 컴포넌트", () => {
     render(<Counter />);
 
     // 초기값 0이 표시되는지 확인
-    const counterValue = screen.getByTestId("counter-value");
+    const counterValue = screen.getByText("0");
     expect(counterValue).toHaveTextContent("0");
   });
 
@@ -27,7 +27,7 @@ describe("RTL 상태 변화 테스트 - Counter 컴포넌트", () => {
   it("사용자 정의 초기값이 올바르게 표시된다", () => {
     render(<Counter initialValue={10} />);
 
-    const counterValue = screen.getByTestId("counter-value");
+    const counterValue = screen.getByText("10");
     expect(counterValue).toHaveTextContent("10");
   });
 
@@ -37,8 +37,8 @@ describe("RTL 상태 변화 테스트 - Counter 컴포넌트", () => {
 
     render(<Counter />);
 
-    const counterValue = screen.getByTestId("counter-value");
-    const incrementButton = screen.getByTestId("increment-button");
+    const counterValue = screen.getByText("0");
+    const incrementButton = screen.getByRole("button", { name: "+" });
 
     // 초기값 확인
     expect(counterValue).toHaveTextContent("0");
@@ -56,8 +56,8 @@ describe("RTL 상태 변화 테스트 - Counter 컴포넌트", () => {
 
     render(<Counter initialValue={5} />);
 
-    const counterValue = screen.getByTestId("counter-value");
-    const decrementButton = screen.getByTestId("decrement-button");
+    const counterValue = screen.getByText("5");
+    const decrementButton = screen.getByRole("button", { name: "-" });
 
     // 초기값 확인
     expect(counterValue).toHaveTextContent("5");
@@ -75,9 +75,9 @@ describe("RTL 상태 변화 테스트 - Counter 컴포넌트", () => {
 
     render(<Counter initialValue={0} step={5} />);
 
-    const counterValue = screen.getByTestId("counter-value");
-    const incrementButton = screen.getByTestId("increment-button");
-    const decrementButton = screen.getByTestId("decrement-button");
+    const counterValue = screen.getByText("0");
+    const incrementButton = screen.getByRole("button", { name: "+" });
+    const decrementButton = screen.getByRole("button", { name: "-" });
 
     // 5씩 증가
     await user.click(incrementButton);
@@ -97,9 +97,9 @@ describe("RTL 상태 변화 테스트 - Counter 컴포넌트", () => {
 
     render(<Counter initialValue={3} />);
 
-    const counterValue = screen.getByTestId("counter-value");
-    const incrementButton = screen.getByTestId("increment-button");
-    const resetButton = screen.getByTestId("reset-button");
+    const counterValue = screen.getByText("3");
+    const incrementButton = screen.getByRole("button", { name: "+" });
+    const resetButton = screen.getByRole("button", { name: /reset/i });
 
     // 값을 여러 번 증가
     await user.click(incrementButton);
@@ -121,10 +121,10 @@ describe("RTL 상태 변화 테스트 - Counter 컴포넌트", () => {
 
     render(<Counter initialValue={0} step={2} />);
 
-    const counterValue = screen.getByTestId("counter-value");
-    const incrementButton = screen.getByTestId("increment-button");
-    const decrementButton = screen.getByTestId("decrement-button");
-    const resetButton = screen.getByTestId("reset-button");
+    const counterValue = screen.getByText("0");
+    const incrementButton = screen.getByRole("button", { name: "+" });
+    const decrementButton = screen.getByRole("button", { name: "-" });
+    const resetButton = screen.getByRole("button", { name: /reset/i });
 
     // 복합적인 조작
     await user.click(incrementButton); // +2 = 2

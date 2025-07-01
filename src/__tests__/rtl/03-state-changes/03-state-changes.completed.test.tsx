@@ -22,8 +22,8 @@ describe("RTL 상태 변화 테스트 - Counter 컴포넌트 (정답)", () => {
     // ✅ Counter 컴포넌트를 렌더링
     render(<Counter />);
 
-    // ✅ getByTestId를 사용해서 "counter-value" 요소를 찾기
-    const counterValue = screen.getByTestId("counter-value");
+    // ✅ getByText를 사용해서 "0" 텍스트를 찾기
+    const counterValue = screen.getByText("0");
 
     // ✅ 초기값이 '0'인지 확인
     expect(counterValue).toHaveTextContent("0");
@@ -34,8 +34,8 @@ describe("RTL 상태 변화 테스트 - Counter 컴포넌트 (정답)", () => {
     // ✅ initialValue={10}으로 Counter 컴포넌트를 렌더링
     render(<Counter initialValue={10} />);
 
-    // ✅ counter-value 요소를 찾아서 '10'인지 확인
-    const counterValue = screen.getByTestId("counter-value");
+    // ✅ getByText를 사용해서 "10" 텍스트를 찾기
+    const counterValue = screen.getByText("10");
     expect(counterValue).toHaveTextContent("10");
   });
 
@@ -47,9 +47,9 @@ describe("RTL 상태 변화 테스트 - Counter 컴포넌트 (정답)", () => {
     // ✅ Counter 컴포넌트를 렌더링
     render(<Counter />);
 
-    // ✅ counter-value와 increment-button 요소를 찾기
-    const counterValue = screen.getByTestId("counter-value");
-    const incrementButton = screen.getByTestId("increment-button");
+    // ✅ getByText로 "0" 텍스트와 getByRole로 "+" 버튼을 찾기
+    const counterValue = screen.getByText("0");
+    const incrementButton = screen.getByRole("button", { name: "+" });
 
     // ✅ 초기값이 '0'인지 확인
     expect(counterValue).toHaveTextContent("0");
@@ -68,9 +68,9 @@ describe("RTL 상태 변화 테스트 - Counter 컴포넌트 (정답)", () => {
     // ✅ initialValue={5}로 Counter를 렌더링
     render(<Counter initialValue={5} />);
 
-    // ✅ counter-value와 decrement-button을 찾기
-    const counterValue = screen.getByTestId("counter-value");
-    const decrementButton = screen.getByTestId("decrement-button");
+    // ✅ getByText로 "5" 텍스트와 getByRole로 "-" 버튼을 찾기
+    const counterValue = screen.getByText("5");
+    const decrementButton = screen.getByRole("button", { name: "-" });
 
     // ✅ 초기값이 '5'인지 확인
     expect(counterValue).toHaveTextContent("5");
@@ -90,10 +90,10 @@ describe("RTL 상태 변화 테스트 - Counter 컴포넌트 (정답)", () => {
     // ✅ initialValue={0}, step={5}로 Counter를 렌더링
     render(<Counter initialValue={0} step={5} />);
 
-    // ✅ 필요한 요소들을 찾기
-    const counterValue = screen.getByTestId("counter-value");
-    const incrementButton = screen.getByTestId("increment-button");
-    const decrementButton = screen.getByTestId("decrement-button");
+    // ✅ getByText로 "0" 텍스트와 getByRole로 "+", "-" 버튼을 찾기
+    const counterValue = screen.getByText("0");
+    const incrementButton = screen.getByRole("button", { name: "+" });
+    const decrementButton = screen.getByRole("button", { name: "-" });
 
     // ✅ 증가 버튼을 클릭하고 값이 '5'인지 확인
     await user.click(incrementButton);
@@ -114,10 +114,10 @@ describe("RTL 상태 변화 테스트 - Counter 컴포넌트 (정답)", () => {
     const user = userEvent.setup();
     render(<Counter initialValue={3} />);
 
-    // ✅ 필요한 모든 요소들을 찾기
-    const counterValue = screen.getByTestId("counter-value");
-    const incrementButton = screen.getByTestId("increment-button");
-    const resetButton = screen.getByTestId("reset-button");
+    // ✅ getByText로 "3" 텍스트와 getByRole로 "+", "Reset" 버튼을 찾기
+    const counterValue = screen.getByText("3");
+    const incrementButton = screen.getByRole("button", { name: "+" });
+    const resetButton = screen.getByRole("button", { name: /reset/i });
 
     // ✅ 증가 버튼을 3번 클릭
     await user.click(incrementButton);
@@ -143,10 +143,10 @@ describe("RTL 상태 변화 테스트 - Counter 컴포넌트 (정답)", () => {
  * 2. 액션 수행 - 사용자 상호작용 시뮬레이션
  * 3. 상태 변화 확인 - UI가 새로운 상태를 정확히 반영하는지
  *
- * 🔍 TestId 활용:
- * - 상태를 표시하는 요소는 testid로 찾는 것이 효율적
- * - 버튼은 role이나 testid 모두 사용 가능
- * - 복잡한 컴포넌트에서는 testid가 더 정확할 수 있음
+ * 🔍 요소 찾기 전략:
+ * - 카운터 값: getByText("숫자") - 실제 표시되는 텍스트로 찾기
+ * - 버튼: getByRole("button", { name: "텍스트" }) - 접근성과 사용자 경험 고려
+ * - 실제 사용자가 어떻게 요소를 인식하는지와 동일한 방식
  *
  * ⚡ 테스트 패턴:
  * - Before: 초기 상태 확인
@@ -163,4 +163,9 @@ describe("RTL 상태 변화 테스트 - Counter 컴포넌트 (정답)", () => {
  * - 각 액션 후 즉시 상태 확인
  * - 누적 효과 테스트 (여러 번 클릭)
  * - 리셋 기능으로 원점 복귀 확인
+ *
+ * 🎯 접근성 고려사항:
+ * - getByRole을 사용하여 스크린 리더 호환성 확인
+ * - 버튼의 접근성 이름(name)을 활용한 정확한 요소 선택
+ * - 실제 사용자 경험과 유사한 테스트 방식
  */
