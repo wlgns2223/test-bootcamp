@@ -1,171 +1,188 @@
 /**
- * React Testing Library 기본 사용법 - 3단계: 상태 변화 테스트 (정답)
+ * React Testing Library 기본 사용법 - 3단계: 상태 변화 테스트 (완성)
  *
  * 학습 목표:
- * 1. useState를 사용한 컴포넌트 상태 테스트
- * 2. 상태 변화에 따른 UI 업데이트 확인
- * 3. 복합적인 사용자 상호작용
+ * 1. 다양한 컴포넌트의 상태 변화 테스트
+ * 2. 복합적인 사용자 상호작용과 상태 관리
+ * 3. 폼 입력, 선택, 토글 등 다양한 UI 패턴 테스트
  *
- * ✅ 실습 과제 정답:
- * - Counter 컴포넌트 상태 테스트의 완성된 버전입니다
+ * 🎯 실습 과제:
+ * - 다양한 컴포넌트의 상태 변화를 테스트해보세요
+ * - 사용자 상호작용에 따른 UI 업데이트를 확인하세요
  */
 
 import React from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
-import Counter from "../../../components/Counter";
+import TodoList from "../../../components/TodoList";
+import Toggle from "../../../components/Toggle";
+import Form from "../../../components/Form";
+import Tab from "../../../components/Tab";
+import Accordion from "../../../components/Accordion";
+import MultiSelect from "../../../components/MultiSelect";
 
-describe("RTL 상태 변화 테스트 - Counter 컴포넌트 (정답)", () => {
-  // ✅ 정답 1: 초기 상태 확인
-  it("초기값이 올바르게 표시된다", () => {
-    // ✅ Counter 컴포넌트를 렌더링
-    render(<Counter />);
-
-    // ✅ getByText를 사용해서 "0" 텍스트를 찾기
-    const counterValue = screen.getByText("0");
-
-    // ✅ 초기값이 '0'인지 확인
-    expect(counterValue).toHaveTextContent("0");
-  });
-
-  // ✅ 정답 2: 사용자 정의 초기값
-  it("사용자 정의 초기값이 올바르게 표시된다", () => {
-    // ✅ initialValue={10}으로 Counter 컴포넌트를 렌더링
-    render(<Counter initialValue={10} />);
-
-    // ✅ getByText를 사용해서 "10" 텍스트를 찾기
-    const counterValue = screen.getByText("10");
-    expect(counterValue).toHaveTextContent("10");
-  });
-
-  // ✅ 정답 3: 증가 버튼 테스트
-  it("증가 버튼이 카운터를 올바르게 증가시킨다", async () => {
-    // ✅ userEvent를 설정
+describe("RTL 상태 변화 테스트 - 다양한 컴포넌트 (완성)", () => {
+  // 🎯 실습 1: TodoList 컴포넌트 - 할일 추가/삭제 상태 변화
+  it("할일을 추가하고 삭제할 수 있다", async () => {
     const user = userEvent.setup();
 
-    // ✅ Counter 컴포넌트를 렌더링
-    render(<Counter />);
+    render(<TodoList />);
 
-    // ✅ getByText로 "0" 텍스트와 getByRole로 "+" 버튼을 찾기
-    const counterValue = screen.getByText("0");
-    const incrementButton = screen.getByRole("button", { name: "+" });
+    const input = screen.getByPlaceholderText("할일을 입력하세요");
+    const addButton = screen.getByRole("button", { name: "추가" });
 
-    // ✅ 초기값이 '0'인지 확인
-    expect(counterValue).toHaveTextContent("0");
+    await user.type(input, "테스트 할일");
+    await user.click(addButton);
 
-    // ✅ 증가 버튼을 클릭
-    await user.click(incrementButton);
+    expect(screen.getByText("테스트 할일")).toBeInTheDocument();
 
-    // ✅ 값이 '1'로 변경되었는지 확인
-    expect(counterValue).toHaveTextContent("1");
+    const deleteButton = screen.getByText("삭제");
+    await user.click(deleteButton);
+
+    expect(screen.queryByText("테스트 할일")).not.toBeInTheDocument();
   });
 
-  // ✅ 정답 4: 감소 버튼 테스트
-  it("감소 버튼이 카운터를 올바르게 감소시킨다", async () => {
+  // 🎯 실습 2: Toggle 컴포넌트 - 체크박스 상태 변화
+  it("토글 상태가 올바르게 변경된다", async () => {
     const user = userEvent.setup();
 
-    // ✅ initialValue={5}로 Counter를 렌더링
-    render(<Counter initialValue={5} />);
+    render(<Toggle />);
 
-    // ✅ getByText로 "5" 텍스트와 getByRole로 "-" 버튼을 찾기
-    const counterValue = screen.getByText("5");
-    const decrementButton = screen.getByRole("button", { name: "-" });
+    const checkbox = screen.getByRole("checkbox");
 
-    // ✅ 초기값이 '5'인지 확인
-    expect(counterValue).toHaveTextContent("5");
+    expect(checkbox).not.toBeChecked();
 
-    // ✅ 감소 버튼을 클릭
-    await user.click(decrementButton);
+    await user.click(checkbox);
 
-    // ✅ 값이 '4'로 변경되었는지 확인
-    expect(counterValue).toHaveTextContent("4");
+    expect(screen.getByText("상태: 켜짐")).toBeInTheDocument();
+    expect(screen.getByText("토글 횟수: 1")).toBeInTheDocument();
   });
 
-  // ✅ 정답 5: 사용자 정의 스텝 테스트
-  it("사용자 정의 스텝으로 증가/감소한다", async () => {
-    // ✅ userEvent를 설정
+  // 🎯 실습 3: Form 컴포넌트 - 폼 입력 상태 변화
+  it("폼 입력과 제출이 올바르게 작동한다", async () => {
     const user = userEvent.setup();
 
-    // ✅ initialValue={0}, step={5}로 Counter를 렌더링
-    render(<Counter initialValue={0} step={5} />);
+    render(<Form />);
 
-    // ✅ getByText로 "0" 텍스트와 getByRole로 "+", "-" 버튼을 찾기
-    const counterValue = screen.getByText("0");
-    const incrementButton = screen.getByRole("button", { name: "+" });
-    const decrementButton = screen.getByRole("button", { name: "-" });
+    const nameInput = screen.getByLabelText("이름:");
+    const emailInput = screen.getByLabelText("이메일:");
+    const messageInput = screen.getByLabelText("메시지:");
 
-    // ✅ 증가 버튼을 클릭하고 값이 '5'인지 확인
-    await user.click(incrementButton);
-    expect(counterValue).toHaveTextContent("5");
+    await user.type(nameInput, "홍길동");
+    await user.type(emailInput, "test@test.com");
+    await user.type(messageInput, "테스트 메시지");
 
-    // ✅ 다시 증가 버튼을 클릭하고 값이 '10'인지 확인
-    await user.click(incrementButton);
-    expect(counterValue).toHaveTextContent("10");
+    const submitButton = screen.getByRole("button", { name: "제출" });
+    await user.click(submitButton);
 
-    // ✅ 감소 버튼을 클릭하고 값이 '5'인지 확인
-    await user.click(decrementButton);
-    expect(counterValue).toHaveTextContent("5");
+    expect(screen.getByText("제출 완료!")).toBeInTheDocument();
   });
 
-  // ✅ 정답 6: 리셋 버튼 테스트
-  it("리셋 버튼이 카운터를 초기값으로 되돌린다", async () => {
-    // ✅ userEvent 설정과 initialValue={3}으로 Counter 렌더링
+  // 🎯 실습 4: Tab 컴포넌트 - 탭 전환 상태 변화
+  it("탭 전환이 올바르게 작동한다", async () => {
+    const tabs = [
+      { id: "tab1", label: "첫번째 탭", content: "첫번째 탭 내용" },
+      { id: "tab2", label: "두번째 탭", content: "두번째 탭 내용" },
+      { id: "tab3", label: "세번째 탭", content: "세번째 탭 내용" },
+    ];
+
     const user = userEvent.setup();
-    render(<Counter initialValue={3} />);
 
-    // ✅ getByText로 "3" 텍스트와 getByRole로 "+", "Reset" 버튼을 찾기
-    const counterValue = screen.getByText("3");
-    const incrementButton = screen.getByRole("button", { name: "+" });
-    const resetButton = screen.getByRole("button", { name: /reset/i });
+    render(<Tab tabs={tabs} />);
 
-    // ✅ 증가 버튼을 3번 클릭
-    await user.click(incrementButton);
-    await user.click(incrementButton);
-    await user.click(incrementButton);
+    const firstTabButton = screen.getByRole("button", { name: "첫번째 탭" });
+    const secondTabButton = screen.getByRole("button", { name: "두번째 탭" });
 
-    // ✅ 값이 '6'인지 확인
-    expect(counterValue).toHaveTextContent("6");
+    expect(screen.getByText("첫번째 탭 내용")).toBeInTheDocument();
 
-    // ✅ 리셋 버튼을 클릭
-    await user.click(resetButton);
+    await user.click(secondTabButton);
 
-    // ✅ 값이 초기값 '3'으로 되돌아갔는지 확인
-    expect(counterValue).toHaveTextContent("3");
+    expect(screen.getByText("두번째 탭 내용")).toBeInTheDocument();
+    expect(screen.getByText("탭 히스토리: 2개")).toBeInTheDocument();
+  });
+
+  // 🎯 실습 5: Accordion 컴포넌트 - 아코디언 열기/닫기
+  it("아코디언 항목을 열고 닫을 수 있다", async () => {
+    const items = [
+      { id: "item1", title: "항목 1", content: "항목 1의 내용입니다" },
+      { id: "item2", title: "항목 2", content: "항목 2의 내용입니다" },
+    ];
+
+    const user = userEvent.setup();
+
+    render(<Accordion items={items} />);
+
+    const item1Button = screen.getByText("항목 1");
+
+    expect(screen.queryByText("항목 1의 내용입니다")).not.toBeInTheDocument();
+
+    await user.click(item1Button);
+
+    expect(screen.getByText("항목 1의 내용입니다")).toBeInTheDocument();
+    expect(screen.getByText("클릭 횟수: 1")).toBeInTheDocument();
+  });
+
+  // 🎯 실습 6: MultiSelect 컴포넌트 - 다중 선택 상태 변화
+  it("다중 선택이 올바르게 작동한다", async () => {
+    const options = [
+      { id: "opt1", label: "옵션 1", value: "value1" },
+      { id: "opt2", label: "옵션 2", value: "value2" },
+      { id: "opt3", label: "옵션 3", value: "value3" },
+      { id: "opt4", label: "옵션 4", value: "value4" },
+    ];
+
+    const user = userEvent.setup();
+
+    render(<MultiSelect options={options} />);
+
+    const showOptionsButton = screen.getByRole("button", { name: "옵션 보기" });
+    await user.click(showOptionsButton);
+
+    const firstCheckbox = screen.getAllByRole("checkbox")[0];
+    await user.click(firstCheckbox);
+
+    expect(screen.getByText("선택 개수: 1/3")).toBeInTheDocument();
+
+    const selectAllButton = screen.getByRole("button", { name: "모두 선택" });
+    await user.click(selectAllButton);
+
+    expect(screen.getByText("선택 개수: 3/3")).toBeInTheDocument();
+    expect(screen.getByText("최대 선택 개수에 도달했습니다!")).toBeInTheDocument();
   });
 });
 
 /**
- * 💡 정답 해설:
+ * 💡 실습에서 사용할 주요 API들:
  *
- * 🎮 상태 변화 테스트의 핵심:
- * 1. 초기 상태 확인 - 컴포넌트가 올바른 초기값으로 시작하는지
- * 2. 액션 수행 - 사용자 상호작용 시뮬레이션
- * 3. 상태 변화 확인 - UI가 새로운 상태를 정확히 반영하는지
+ * 🎮 컴포넌트별 주요 props:
+ * - TodoList: initialTodos - 초기 할일 목록
+ * - Toggle: initialChecked, label, disabled - 초기 상태, 라벨, 비활성화 여부
+ * - Form: initialData - 초기 폼 데이터
+ * - Tab: tabs, defaultActiveTab - 탭 목록, 기본 활성 탭
+ * - Accordion: items, allowMultiple, defaultOpen - 항목 목록, 다중 열기 허용, 기본 열린 항목
+ * - MultiSelect: options, maxSelections, defaultSelected - 옵션 목록, 최대 선택 개수, 기본 선택된 항목
  *
- * 🔍 요소 찾기 전략:
- * - 카운터 값: getByText("숫자") - 실제 표시되는 텍스트로 찾기
- * - 버튼: getByRole("button", { name: "텍스트" }) - 접근성과 사용자 경험 고려
- * - 실제 사용자가 어떻게 요소를 인식하는지와 동일한 방식
+ * 🎯 요소 찾기:
+ * - 입력 필드: getByPlaceholderText("placeholder"), getByLabelText("라벨")
+ * - 버튼: getByRole("button", { name: "버튼 텍스트" })
+ * - 체크박스: getByRole("checkbox")
+ * - 텍스트: getByText("텍스트"), queryByText("텍스트") (존재하지 않을 수 있는 경우)
  *
- * ⚡ 테스트 패턴:
- * - Before: 초기 상태 확인
- * - Action: 사용자 상호작용
- * - After: 결과 상태 확인
- * - 이 패턴을 반복하여 복합적인 시나리오 테스트
+ * 🔍 주요 쿼리:
+ * - screen.getByText("text") - 텍스트로 요소 찾기
+ * - screen.getByRole("button", { name: "text" }) - 버튼 역할과 텍스트로 찾기
+ * - screen.getByPlaceholderText("placeholder") - placeholder로 입력 필드 찾기
+ * - screen.getByLabelText("label") - label로 입력 필드 찾기
+ * - screen.queryByText("text") - 텍스트로 요소 찾기 (없으면 null)
+ * - expect(element).toHaveTextContent("text") - 텍스트 내용 확인
+ * - expect(element).toBeChecked() - 체크박스가 체크되었는지 확인
+ * - expect(element).toBeDisabled() - 요소가 비활성화되었는지 확인
  *
- * 🎯 Props 테스트:
- * - initialValue: 다양한 초기값으로 테스트
- * - step: 증가/감소 단위 변경 테스트
- * - 컴포넌트의 유연성과 안정성 확인
- *
- * 📊 상태 추적:
- * - 각 액션 후 즉시 상태 확인
- * - 누적 효과 테스트 (여러 번 클릭)
- * - 리셋 기능으로 원점 복귀 확인
- *
- * 🎯 접근성 고려사항:
- * - getByRole을 사용하여 스크린 리더 호환성 확인
- * - 버튼의 접근성 이름(name)을 활용한 정확한 요소 선택
- * - 실제 사용자 경험과 유사한 테스트 방식
+ * ⚡ 상태 변화 테스트 패턴:
+ * 1. 초기 상태 확인
+ * 2. 사용자 액션 수행 (클릭, 입력, 선택 등)
+ * 3. 변경된 상태 확인
+ * 4. 복합적인 상호작용 테스트
+ * 5. 에러 상태나 경계 조건 테스트
  */
