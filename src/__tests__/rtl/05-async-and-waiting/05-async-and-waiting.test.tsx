@@ -66,7 +66,7 @@ function AutoLoadingComponent() {
   useEffect(() => {
     const timer = setTimeout(() => {
       setMessage("Content loaded!");
-    }, 500);
+    }, 10000);
 
     return () => clearTimeout(timer);
   }, []);
@@ -198,13 +198,19 @@ describe("RTL 비동기 테스트", () => {
     expect(screen.getByRole("status")).toHaveTextContent("Loading...");
 
     // 500ms 후 내용 변경
-    jest.advanceTimersByTime(500);
+    jest.advanceTimersByTime(10000);
 
     // 변경된 내용 확인
-    await waitFor(() => {
-      expect(screen.getByRole("status")).toHaveTextContent("Content loaded!");
-    });
-  });
+    // await waitFor(() => {
+    //   expect(screen.getByRole("status")).toHaveTextContent("Content loaded!");
+    // });
+
+    // const statusByRole = await screen.findByRole("status",undefined, {timeout:6000});
+    // expect(statusByRole).toHaveTextContent("Content");
+
+    const status = await screen.findByText("Content loaded!", undefined, { timeout: 15000 });
+    expect(status).toHaveTextContent("Content");
+  }, 15000);
 
   // 7. 타임아웃 테스트
   it("waitFor 타임아웃을 설정할 수 있다", async () => {

@@ -36,11 +36,7 @@ function TodoApp() {
   };
 
   const toggleTodo = (id: number) => {
-    setTodos(
-      todos.map((todo) =>
-        todo.id === id ? { ...todo, completed: !todo.completed } : todo
-      )
-    );
+    setTodos(todos.map((todo) => (todo.id === id ? { ...todo, completed: !todo.completed } : todo)));
   };
 
   return (
@@ -61,14 +57,8 @@ function TodoApp() {
         {todos.map((todo) => (
           <li key={todo.id} role="listitem">
             <label>
-              <input
-                type="checkbox"
-                checked={todo.completed}
-                onChange={() => toggleTodo(todo.id)}
-              />
-              <span className={todo.completed ? "completed" : ""}>
-                {todo.text}
-              </span>
+              <input type="checkbox" checked={todo.completed} onChange={() => toggleTodo(todo.id)} />
+              <span className={todo.completed ? "completed" : ""}>{todo.text}</span>
             </label>
           </li>
         ))}
@@ -101,7 +91,7 @@ describe("RTL 베스트 프랙티스", () => {
   it("✅ GOOD: 의미있는 role과 label을 사용한다", async () => {
     const user = userEvent.setup();
 
-    render(<TodoApp />);
+    const { container } = render(<TodoApp />);
 
     // role을 활용한 의미있는 선택
     const todoList = screen.getByRole("list");
@@ -245,12 +235,8 @@ describe("RTL 베스트 프랙티스", () => {
 
     // 4. 모든 할일 상태 확인
     expect(learnReactCheckbox).toBeChecked();
-    expect(
-      screen.getByRole("checkbox", { name: /write tests/i })
-    ).toBeChecked();
-    expect(
-      screen.getByRole("checkbox", { name: /go shopping/i })
-    ).not.toBeChecked();
+    expect(screen.getByRole("checkbox", { name: /write tests/i })).toBeChecked();
+    expect(screen.getByRole("checkbox", { name: /go shopping/i })).not.toBeChecked();
 
     // 5. 총 할일 개수 확인
     expect(screen.getAllByRole("listitem")).toHaveLength(3);

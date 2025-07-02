@@ -69,6 +69,16 @@ describe("RTL 비동기 테스트 (실습)", () => {
     // TODO: userEvent 설정, 컴포넌트 렌더링
     // TODO: getByRole로 버튼 찾기 및 클릭
     // TODO: getByRole로 로딩 상태 확인
+
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    render(<AsyncComponent />);
+
+    const button = screen.getByRole("button");
+
+    expect(button).toBeInTheDocument();
+
+    await user.click(button);
+    expect(screen.getByRole("status")).toHaveTextContent("Loading");
   });
 
   // 🎯 실습 2: waitFor를 사용한 데이터 로딩 완료 대기
@@ -76,12 +86,43 @@ describe("RTL 비동기 테스트 (실습)", () => {
     // TODO: Math.random 모킹으로 항상 성공하도록 설정
     // TODO: getByRole로 버튼 찾기 및 클릭 후 타이머 진행
     // TODO: waitFor로 getByRole로 성공 데이터 확인
+
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    render(<AsyncComponent />);
+    const successCriteria = 0.7;
+    jest.spyOn(Math, "random").mockReturnValue(successCriteria);
+
+    const fetchButton = screen.getByRole("button");
+
+    await user.click(fetchButton);
+
+    const timeToPass = 1000;
+    jest.advanceTimersByTime(timeToPass);
+
+    await waitFor(() => {
+      expect(screen.getByRole("status")).toHaveTextContent(/successfully/i);
+    });
   });
 
   // 🎯 실습 3: findBy를 사용한 비동기 요소 찾기
   it("findBy를 사용하여 비동기 요소를 찾을 수 있다", async () => {
     // TODO: 성공 시나리오 모킹
     // TODO: findByText로 성공 데이터 대기
+
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    render(<AsyncComponent />);
+    const successCriteria = 0.7;
+    jest.spyOn(Math, "random").mockReturnValue(successCriteria);
+
+    const fetchButton = screen.getByRole("button");
+
+    await user.click(fetchButton);
+
+    const timeToPass = 1000;
+    jest.advanceTimersByTime(timeToPass);
+
+    const successState = await screen.findByText(/successfully/i);
+    expect(successState).toBeInTheDocument();
   });
 
   // 🎯 실습 4: 에러 상태 처리 테스트
@@ -89,6 +130,19 @@ describe("RTL 비동기 테스트 (실습)", () => {
     // TODO: Math.random 모킹으로 항상 실패하도록 설정
     // TODO: 버튼 클릭 후 타이머 진행
     // TODO: findByRole로 에러 메시지 대기
+
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    jest.spyOn(Math, "random").mockReturnValue(0.4);
+    render(<AsyncComponent />);
+
+    const button = screen.getByRole("button");
+    await user.click(button);
+
+    jest.advanceTimersByTime(1000);
+
+    const errorAlert = await screen.findByRole("alert");
+    expect(errorAlert).toBeInTheDocument();
+    expect(errorAlert).toHaveTextContent(/failed to fetch/i);
   });
 
   // 🎯 실습 5: 복합적인 비동기 시나리오 테스트
